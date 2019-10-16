@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "beancount-n26"
+version = "0.1.0"
+description = "Beancount Importer for N26 CSV exports"
+authors = ["Siddhant Goel <me@sgoel.org>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+beancount = "^2.2"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.7"
+isort = "^4.3"
+black = {version = "^18.3-alpha.0", allows-prereleases = true}
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
