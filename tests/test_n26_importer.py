@@ -67,7 +67,7 @@ def test_en_extract_single_transaction(importer, filename):
             _format(
                 '''
                 {header}
-                "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","Miscellaneous","-12.34","","",""
+                "2019-10-10","Muster GmbH","{iban_number}","Outgoing Transfer","Muster payment","Miscellaneous","-12.34","","",""
                 '''  # NOQA
             )
         )
@@ -77,10 +77,50 @@ def test_en_extract_single_transaction(importer, filename):
 
     assert len(transactions) == 1
     assert transactions[0].date == datetime.date(2019, 10, 10)
+    assert transactions[0].payee == 'Muster GmbH'
+    assert transactions[0].narration == 'Muster payment'
+
+    assert len(transactions[0].postings) == 1
+    assert transactions[0].postings[0].account == 'Assets:N26'
+    assert transactions[0].postings[0].units.currency == 'EUR'
+    assert transactions[0].postings[0].units.number == Decimal('-12.34')
+
+
+def test_en_extract_multiple_transactions(importer, filename):
+    with open(filename, 'wb') as fd:
+        fd.write(
+            _format(
+                '''
+                {header}
+                "2019-10-10","MAX MUSTERMANN","{iban_number}","Income","Muster GmbH","Income","-56.78","","",""
+                "2019-10-10","Muster GmbH","{iban_number}","Outgoing Transfer","Muster payment","Income","-12.34","","",""
+                '''  # NOQA
+            )
+        )
+
+    with open(filename) as fd:
+        transactions = importer.extract(fd)
+
+    assert len(transactions) == 2
+
+    # first
+
+    assert transactions[0].date == datetime.date(2019, 10, 10)
     assert transactions[0].payee == 'MAX MUSTERMANN'
     assert transactions[0].narration == 'Muster GmbH'
 
     assert len(transactions[0].postings) == 1
     assert transactions[0].postings[0].account == 'Assets:N26'
     assert transactions[0].postings[0].units.currency == 'EUR'
-    assert transactions[0].postings[0].units.number == Decimal('-12.34')
+    assert transactions[0].postings[0].units.number == Decimal('-56.78')
+
+    # second
+
+    assert transactions[1].date == datetime.date(2019, 10, 10)
+    assert transactions[1].payee == 'Muster GmbH'
+    assert transactions[1].narration == 'Muster payment'
+
+    assert len(transactions[1].postings) == 1
+    assert transactions[1].postings[0].account == 'Assets:N26'
+    assert transactions[1].postings[0].units.currency == 'EUR'
+    assert transactions[1].postings[0].units.number == Decimal('-12.34')
