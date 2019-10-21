@@ -11,7 +11,6 @@ beancount = "^2.2"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7"
-isort = "^4.3"
 black = {version = "^18.3-alpha.0", allows-prereleases = true}
 
 [tool.black]
