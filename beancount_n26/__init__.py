@@ -30,7 +30,7 @@ def _is_language_supported(lang: str) -> bool:
     return lang in HEADER_FIELDS
 
 
-def _header_for(lang: str) -> Tuple[str, ...]:
+def _header_values_for(lang: str) -> Tuple[str, ...]:
     return tuple(HEADER_FIELDS[lang].values())
 
 
@@ -56,10 +56,6 @@ class N26Importer(importer.ImporterProtocol):
                 f'Language {language} is not supported (yet)'
             )
 
-    @property
-    def _expected_header(self):
-        return _header_for(self.language)
-
     def name(self):
         return 'N26 {}'.format(self.__class__.__name__)
 
@@ -67,9 +63,17 @@ class N26Importer(importer.ImporterProtocol):
         return self.account
 
     def is_valid_header(self, line: str) -> bool:
-        fields = tuple([column.strip('"') for column in line.split(',')])
+        expected_values = _header_values_for(self.language)
+        actual_values = [column.strip('"') for column in line.split(',')]
 
-        return fields == self._expected_header
+        if len(expected_values) != len(actual_values):
+            return False
+
+        for (expected, actual) in zip(expected_values, actual_values):
+            if expected != actual:
+                return False
+
+        return True
 
     def identify(self, file_) -> bool:
         with open(file_.name, encoding=self.file_encoding) as fd:

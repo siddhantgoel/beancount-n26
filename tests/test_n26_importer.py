@@ -4,14 +4,17 @@ from textwrap import dedent
 from beancount.core.number import Decimal
 import pytest
 
-from beancount_n26 import _header_for, N26Importer
+from beancount_n26 import _header_values_for, N26Importer
 
 IBAN_NUMBER = 'DE99 9999 9999 9999 9999 99'.replace(' ', '')
 
 
 def _format(string, **kwargs):
     kwargs.update(
-        {'iban_number': IBAN_NUMBER, 'header': ','.join(_header_for('en'))}
+        {
+            'iban_number': IBAN_NUMBER,
+            'header': ','.join(_header_values_for('en')),
+        }
     )
 
     return dedent(string).format(**kwargs).lstrip().encode('utf-8')
