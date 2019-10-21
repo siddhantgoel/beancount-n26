@@ -62,7 +62,7 @@ class N26Importer(importer.ImporterProtocol):
         return self.account
 
     def is_valid_header(self, line):
-        fields = [column.strip('"') for column in line.split(',')]
+        fields = tuple([column.strip('"') for column in line.split(',')])
 
         try:
             return fields == _header_for(self.language)
