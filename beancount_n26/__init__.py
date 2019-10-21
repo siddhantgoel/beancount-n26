@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import csv
 from datetime import datetime
-from typing import Tuple
+from typing import Mapping, Tuple
 
 from beancount.core import data
 from beancount.core.amount import Amount
@@ -30,8 +30,12 @@ def _is_language_supported(lang: str) -> bool:
     return lang in HEADER_FIELDS
 
 
+def _translation_strings_for(lang: str) -> Mapping[str, str]:
+    return HEADER_FIELDS[lang]
+
+
 def _header_values_for(lang: str) -> Tuple[str, ...]:
-    return tuple(HEADER_FIELDS[lang].values())
+    return tuple(_translation_strings_for(lang).values())
 
 
 class InvalidFormatError(Exception):
@@ -55,6 +59,11 @@ class N26Importer(importer.ImporterProtocol):
             raise InvalidFormatError(
                 f'Language {language} is not supported (yet)'
             )
+
+        self._translation_strings = _translation_strings_for(self.language)
+
+    def _translate(self, key):
+        return self._translation_strings[key]
 
     def name(self):
         return 'N26 {}'.format(self.__class__.__name__)
@@ -95,12 +104,23 @@ class N26Importer(importer.ImporterProtocol):
             for index, line in enumerate(reader):
                 meta = data.new_metadata(file_.name, index)
 
-                if line['Amount (EUR)']:
-                    amount = Decimal(line['Amount (EUR)'])
+                s_amount_eur = self._translate('amount_eur')
+                s_amount_foreign_currency = self._translate(
+                    'amount_foreign_currency'
+                )
+                s_date = self._translate('date')
+                s_payee = self._translate('payee')
+                s_payment_reference = self._translate('payment_reference')
+                s_type_foreign_currency = self._translate(
+                    'type_foreign_currency'
+                )
+
+                if line[s_amount_eur]:
+                    amount = Decimal(line[s_amount_eur])
                     currency = 'EUR'
                 else:
-                    amount = Decimal(line['Amount (Foreign Currency)'])
-                    currency = line['Type Foreign Currency']
+                    amount = Decimal(line[s_amount_foreign_currency])
+                    currency = line[s_type_foreign_currency]
 
                 postings = [
                     data.Posting(
@@ -116,10 +136,10 @@ class N26Importer(importer.ImporterProtocol):
                 entries.append(
                     data.Transaction(
                         meta,
-                        datetime.strptime(line['Date'], '%Y-%m-%d').date(),
+                        datetime.strptime(line[s_date], '%Y-%m-%d').date(),
                         self.FLAG,
-                        line['Payee'],
-                        line['Payment reference'],
+                        line[s_payee],
+                        line[s_payment_reference],
                         data.EMPTY_SET,
                         data.EMPTY_SET,
                         postings,
