@@ -5,6 +5,7 @@ from typing import Tuple
 
 from beancount.core import data
 from beancount.core.amount import Amount
+from beancount.core.number import Decimal
 from beancount.ingest import importer
 
 HEADER_FIELDS = {
@@ -64,10 +65,7 @@ class N26Importer(importer.ImporterProtocol):
     def is_valid_header(self, line):
         fields = tuple([column.strip('"') for column in line.split(',')])
 
-        try:
-            return fields == _header_for(self.language)
-        except InvalidFormatError:
-            return False
+        return fields == _header_for(self.language)
 
     def identify(self, file_):
         with open(file_.name, encoding=self.file_encoding) as fd:
@@ -77,17 +75,11 @@ class N26Importer(importer.ImporterProtocol):
 
     def extract(self, file_):
         entries = []
-        line_index = 0
+
+        if not self.identify(file_):
+            return []
 
         with open(file_.name, encoding=self.file_encoding) as fd:
-            # Header
-            line = fd.readline().strip()
-            line_index += 1
-
-            if not self.is_valid_header(line):
-                raise InvalidFormatError()
-
-            # Data entries
             reader = csv.DictReader(
                 fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
@@ -96,29 +88,30 @@ class N26Importer(importer.ImporterProtocol):
                 meta = data.new_metadata(file_.name, index)
 
                 if line['Amount (EUR)']:
-                    amount = line['Amount (EUR)']
+                    amount = Decimal(line['Amount (EUR)'])
                     currency = 'EUR'
                 else:
-                    amount = line['Amount (Foreign Currency)']
+                    amount = Decimal(line['Amount (Foreign Currency)'])
                     currency = line['Type Foreign Currency']
 
-                amount = Amount(amount, currency)
-
-                date = datetime.strptime(line['Date'], '%Y-%m-%d').date()
-
-                description = line['Payment reference']
-
                 postings = [
-                    data.Posting(self.account, amount, None, None, None, None)
+                    data.Posting(
+                        self.account,
+                        Amount(amount, currency),
+                        None,
+                        None,
+                        None,
+                        None,
+                    )
                 ]
 
                 entries.append(
                     data.Transaction(
                         meta,
-                        date,
+                        datetime.strptime(line['Date'], '%Y-%m-%d').date(),
                         self.FLAG,
-                        None,
-                        description,
+                        line['Payee'],
+                        line['Payment reference'],
                         data.EMPTY_SET,
                         data.EMPTY_SET,
                         postings,
