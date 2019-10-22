@@ -10,6 +10,9 @@ Beancount N26 Importer
 .. image:: https://img.shields.io/pypi/pyversions/beancount-n26.svg
     :target: https://pypi.python.org/pypi/beancount-n26
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 :code:`beancount-n26` provides an Importer for converting CSV exports of N26_
 account summaries to the Beancount_ format.
 
