@@ -26,16 +26,16 @@ HEADER_FIELDS = {
 }
 
 
-def _is_language_supported(lang: str) -> bool:
-    return lang in HEADER_FIELDS
+def _is_language_supported(language: str) -> bool:
+    return language in HEADER_FIELDS
 
 
-def _translation_strings_for(lang: str) -> Mapping[str, str]:
-    return HEADER_FIELDS[lang]
+def _translation_strings_for(language: str) -> Mapping[str, str]:
+    return HEADER_FIELDS[language]
 
 
-def _header_values_for(lang: str) -> Tuple[str, ...]:
-    return tuple(_translation_strings_for(lang).values())
+def _header_values_for(language: str) -> Tuple[str, ...]:
+    return tuple(_translation_strings_for(language).values())
 
 
 class InvalidFormatError(Exception):
