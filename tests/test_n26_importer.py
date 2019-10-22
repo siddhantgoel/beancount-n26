@@ -14,21 +14,11 @@ def _format(string, **kwargs):
     kwargs.update(
         {
             'iban_number': IBAN_NUMBER,
-            'header': ','.join(_header_values_for('en')),
+            'header': ','.join(_header_values_for(kwargs['language'])),
         }
     )
 
     return dedent(string).format(**kwargs).lstrip().encode('utf-8')
-
-
-@pytest.fixture
-def importer():
-    return N26Importer(IBAN_NUMBER, 'Assets:N26', 'en')
-
-
-@pytest.fixture
-def filename(tmp_path):
-    return os.path.join(str(tmp_path), '{}.csv'.format(IBAN_NUMBER))
 
 
 @pytest.fixture(params=HEADER_FIELDS.keys())
@@ -36,14 +26,25 @@ def language(request):
     return request.param
 
 
-def test_identify_correct(importer, filename, language):
+@pytest.fixture
+def filename(tmp_path):
+    return os.path.join(str(tmp_path), '{}.csv'.format(IBAN_NUMBER))
+
+
+@pytest.fixture
+def importer(language):
+    return N26Importer(IBAN_NUMBER, 'Assets:N26', language)
+
+
+def test_identify_correct(importer, filename):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
                 '''
                 {header}
                 "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","Miscellaneous","-12.34","","",""
-                '''  # NOQA
+                ''',  # NOQA
+                language=importer.language,
             )
         )
 
@@ -51,13 +52,14 @@ def test_identify_correct(importer, filename, language):
         assert importer.identify(fd)
 
 
-def test_extract_no_transactions(importer, filename, language):
+def test_extract_no_transactions(importer, filename):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
                 '''
                 {header}
-                '''
+                ''',
+                language=importer.language,
             )
         )
 
@@ -67,14 +69,15 @@ def test_extract_no_transactions(importer, filename, language):
     assert len(transactions) == 0
 
 
-def test_extract_single_transaction(importer, filename, language):
+def test_extract_single_transaction(importer, filename):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
                 '''
                 {header}
                 "2019-10-10","Muster GmbH","{iban_number}","Outgoing Transfer","Muster payment","Miscellaneous","-12.34","","",""
-                '''  # NOQA
+                ''',  # NOQA
+                language=importer.language,
             )
         )
 
@@ -92,7 +95,7 @@ def test_extract_single_transaction(importer, filename, language):
     assert transactions[0].postings[0].units.number == Decimal('-12.34')
 
 
-def test_extract_multiple_transactions(importer, filename, language):
+def test_extract_multiple_transactions(importer, filename):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
@@ -100,7 +103,8 @@ def test_extract_multiple_transactions(importer, filename, language):
                 {header}
                 "2019-10-10","MAX MUSTERMANN","{iban_number}","Income","Muster GmbH","Income","-56.78","","",""
                 "2019-10-10","Muster GmbH","{iban_number}","Outgoing Transfer","Muster payment","Income","-12.34","","",""
-                '''  # NOQA
+                ''',  # NOQA
+                language=importer.language,
             )
         )
 
