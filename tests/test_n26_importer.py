@@ -1,4 +1,5 @@
 import datetime
+import os.path
 from textwrap import dedent
 
 from beancount.core.number import Decimal
@@ -27,7 +28,7 @@ def importer():
 
 @pytest.fixture
 def filename(tmp_path):
-    return tmp_path / f'{IBAN_NUMBER}.csv'
+    return os.path.join(str(tmp_path), '{}.csv'.format(IBAN_NUMBER))
 
 
 @pytest.fixture(params=HEADER_FIELDS.keys())

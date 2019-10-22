@@ -71,7 +71,7 @@ class N26Importer(importer.ImporterProtocol):
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
-                f'Language {language} is not supported (yet)'
+                'Language {} is not supported (yet)'.format(language)
             )
 
         self._translation_strings = _translation_strings_for(self.language)
