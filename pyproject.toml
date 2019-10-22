@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beancount-n26"
-version = "0.1.0"
+version = "0.2.0"
 description = "Beancount Importer for N26 CSV exports"
 readme = "README.rst"
 authors = ["Siddhant Goel <me@sgoel.org>"]
@@ -12,6 +12,7 @@ classifiers = [
     "Intended Audience :: Financial and Insurance Industry",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3 :: Only",
@@ -21,12 +22,12 @@ repository = "https://github.com/siddhantgoel/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.5"
 beancount = "^2.2"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7"
-black = {version = "^18.3-alpha.0", allows-prereleases = true}
+black = {version = "^18.3-alpha.0", allows-prereleases = true, python = "^3.6"}
 mypy = "^0.740.0"
 
 [tool.black]
