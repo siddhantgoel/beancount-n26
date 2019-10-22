@@ -4,7 +4,7 @@ from textwrap import dedent
 from beancount.core.number import Decimal
 import pytest
 
-from beancount_n26 import _header_values_for, N26Importer
+from beancount_n26 import _header_values_for, N26Importer, HEADER_FIELDS
 
 IBAN_NUMBER = 'DE99 9999 9999 9999 9999 99'.replace(' ', '')
 
@@ -30,7 +30,12 @@ def filename(tmp_path):
     return tmp_path / f'{IBAN_NUMBER}.csv'
 
 
-def test_en_identify_correct(importer, filename):
+@pytest.fixture(params=HEADER_FIELDS.keys())
+def language(request):
+    return request.param
+
+
+def test_identify_correct(importer, filename, language):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
@@ -45,7 +50,7 @@ def test_en_identify_correct(importer, filename):
         assert importer.identify(fd)
 
 
-def test_en_extract_no_transactions(importer, filename):
+def test_extract_no_transactions(importer, filename, language):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
@@ -61,7 +66,7 @@ def test_en_extract_no_transactions(importer, filename):
     assert len(transactions) == 0
 
 
-def test_en_extract_single_transaction(importer, filename):
+def test_extract_single_transaction(importer, filename, language):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
@@ -86,7 +91,7 @@ def test_en_extract_single_transaction(importer, filename):
     assert transactions[0].postings[0].units.number == Decimal('-12.34')
 
 
-def test_en_extract_multiple_transactions(importer, filename):
+def test_extract_multiple_transactions(importer, filename, language):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(

@@ -22,7 +22,21 @@ HEADER_FIELDS = {
             ('type_foreign_currency', 'Type Foreign Currency'),
             ('exchange_rate', 'Exchange Rate'),
         )
-    )
+    ),
+    'de': OrderedDict(
+        (
+            ('date', 'Datum'),
+            ('payee', 'Empfänger'),
+            ('account_number', 'Kontonummer'),
+            ('transaction_type', 'Transaktionstyp'),
+            ('payment_reference', 'Verwendungszweck'),
+            ('category', 'Kategorie'),
+            ('amount_eur', 'Betrag (EUR)'),
+            ('amount_foreign_currency', 'Betrag (Fremdwährung)'),
+            ('type_foreign_currency', 'Fremdwährung'),
+            ('exchange_rate', 'Wechselkurs'),
+        )
+    ),
 }
 
 
