@@ -16,6 +16,6 @@ lint: lint-black lint-flake8
 # test
 
 test-pytest:
-	poetry run py.test tests/
+	poetry run pytest tests/
 
 test: test-pytest

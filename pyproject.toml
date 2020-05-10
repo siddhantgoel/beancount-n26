@@ -27,8 +27,9 @@ beancount = "^2.2"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7"
-black = {version = "^18.3-alpha.0", allows-prereleases = true, python = "^3.6"}
-mypy = "^0.740.0"
+black = {version = "^19.10b0", python = "^3.6"}
+mypy = "^0.770.0"
+pytest = "^5.4.2"
 
 [tool.black]
 line-length = 79
