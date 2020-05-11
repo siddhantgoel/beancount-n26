@@ -104,7 +104,7 @@ class N26Importer(importer.ImporterProtocol):
 
         return self.is_valid_header(line)
 
-    def extract(self, file_):
+    def extract(self, file_, existing_entries=None):
         entries = []
 
         if not self.identify(file_):
