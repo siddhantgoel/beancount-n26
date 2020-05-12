@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+v0.3.1 (2020-05-12)
+-------------------
+
+- Add optional parameter :code:`existing_entries` to :code:`extract()` (thanks `@tbm`_)
+
 v0.3.0 (2020-05-10)
 -------------------
 
