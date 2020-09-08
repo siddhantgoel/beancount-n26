@@ -37,6 +37,20 @@ HEADER_FIELDS = {
             ('exchange_rate', 'Wechselkurs'),
         )
     ),
+    'fr': OrderedDict(
+        (
+            ('date', 'Date'),
+            ('payee', 'Bénéficiaire'),
+            ('account_number', 'Numéro de compte'),
+            ('transaction_type', 'Type de transaction'),
+            ('payment_reference', 'Référence de paiement'),
+            ('category', 'Catégorie'),
+            ('amount_eur', 'Montant (EUR)'),
+            ('amount_foreign_currency', 'Montant (Devise étrangère)'),
+            ('type_foreign_currency', 'Sélectionnez la devise étrangère'),
+            ('exchange_rate', 'Taux de conversion'),
+        )
+    ),
 }
 
 
