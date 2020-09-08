@@ -99,6 +99,20 @@ class N26Importer(importer.ImporterProtocol):
     def file_account(self, _):
         return self.account
 
+    def file_date(self, file_):
+        date = None
+        
+        if not self.identify(file_):
+            return date
+        
+        with open(file_.name, encoding=self.file_encoding) as fd:
+            reader = csv.DictReader(
+                fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"')
+            for line in reader:
+                finalLine = line
+            date = datetime.strptime(finalLine[self._translate('date')], '%Y-%m-%d').date()
+        return date
+
     def is_valid_header(self, line: str) -> bool:
         expected_values = _header_values_for(self.language)
         actual_values = [column.strip('"') for column in line.split(',')]
