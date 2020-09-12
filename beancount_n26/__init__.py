@@ -37,6 +37,20 @@ HEADER_FIELDS = {
             ('exchange_rate', 'Wechselkurs'),
         )
     ),
+    'fr': OrderedDict(
+        (
+            ('date', 'Date'),
+            ('payee', 'Bénéficiaire'),
+            ('account_number', 'Numéro de compte'),
+            ('transaction_type', 'Type de transaction'),
+            ('payment_reference', 'Référence de paiement'),
+            ('category', 'Catégorie'),
+            ('amount_eur', 'Montant (EUR)'),
+            ('amount_foreign_currency', 'Montant (Devise étrangère)'),
+            ('type_foreign_currency', 'Sélectionnez la devise étrangère'),
+            ('exchange_rate', 'Taux de conversion'),
+        )
+    ),
 }
 
 
@@ -84,6 +98,27 @@ class N26Importer(importer.ImporterProtocol):
 
     def file_account(self, _):
         return self.account
+
+    def file_date(self, file_):
+
+        if not self.identify(file_):
+            return None
+
+        date = None
+
+        with open(file_.name, encoding=self.file_encoding) as fd:
+            reader = csv.DictReader(
+                fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"'
+            )
+
+            for line in reader:
+                date_tmp = datetime.strptime(
+                    line[self._translate('date')], '%Y-%m-%d'
+                ).date()
+                if not date or date_tmp > date:
+                    date = date_tmp
+
+        return date
 
     def is_valid_header(self, line: str) -> bool:
         expected_values = _header_values_for(self.language)
