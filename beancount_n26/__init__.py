@@ -114,11 +114,11 @@ class N26Importer(importer.ImporterProtocol):
             for line in reader:
                 date_tmp = datetime.strptime(
                     line[self._translate('date')], '%Y-%m-%d'
-                )
+                ).date()
                 if not date or date_tmp > date:
                     date = date_tmp
 
-        return date.date()
+        return date
 
     def is_valid_header(self, line: str) -> bool:
         expected_values = _header_values_for(self.language)
