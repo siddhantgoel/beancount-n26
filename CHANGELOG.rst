@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+v0.4.0 (2020-09-13)
+-------------------
+
+- Support header fields in French (thanks `@ArthurFDLR`_)
+- Implement :code:`file_date` (thanks `@ArthurFDLR`_)
+
 v0.3.1 (2020-05-12)
 -------------------
 
@@ -22,4 +28,5 @@ v0.1.0 (2019-10-21)
 
 - First release
 
+.. _@ArthurFDLR: https://github.com/ArthurFDLR
 .. _@tbm: https://github.com/tbm
