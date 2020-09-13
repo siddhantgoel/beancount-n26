@@ -93,6 +93,11 @@ class N26Importer(importer.ImporterProtocol):
     def _translate(self, key):
         return self._translation_strings[key]
 
+    def _parse_date(self, entry, key='date'):
+        return datetime.strptime(
+            entry[self._translate(key)], '%Y-%m-%d'
+        ).date()
+
     def name(self):
         return 'N26 {}'.format(self.__class__.__name__)
 
@@ -112,9 +117,8 @@ class N26Importer(importer.ImporterProtocol):
             )
 
             for line in reader:
-                date_tmp = datetime.strptime(
-                    line[self._translate('date')], '%Y-%m-%d'
-                ).date()
+                date_tmp = self._parse_date(line)
+
                 if not date or date_tmp > date:
                     date = date_tmp
 
@@ -157,7 +161,6 @@ class N26Importer(importer.ImporterProtocol):
                 s_amount_foreign_currency = self._translate(
                     'amount_foreign_currency'
                 )
-                s_date = self._translate('date')
                 s_payee = self._translate('payee')
                 s_payment_reference = self._translate('payment_reference')
                 s_type_foreign_currency = self._translate(
@@ -185,7 +188,7 @@ class N26Importer(importer.ImporterProtocol):
                 entries.append(
                     data.Transaction(
                         meta,
-                        datetime.strptime(line[s_date], '%Y-%m-%d').date(),
+                        self._parse_date(line),
                         self.FLAG,
                         line[s_payee],
                         line[s_payment_reference],
