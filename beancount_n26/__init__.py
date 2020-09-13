@@ -105,7 +105,6 @@ class N26Importer(importer.ImporterProtocol):
         return self.account
 
     def file_date(self, file_):
-
         if not self.identify(file_):
             return None
 
