@@ -137,10 +137,13 @@ class N26Importer(importer.ImporterProtocol):
         return True
 
     def identify(self, file_) -> bool:
-        with open(file_.name, encoding=self.file_encoding) as fd:
-            line = fd.readline().strip()
-
-        return self.is_valid_header(line)
+        try:
+            with open(file_.name, encoding=self.file_encoding) as fd:
+                line = fd.readline().strip()
+        except ValueError:
+            return False
+        else:
+            return self.is_valid_header(line)
 
     def extract(self, file_, existing_entries=None):
         entries = []
