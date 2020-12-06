@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+v0.4.1 (2020-12-06)
+-------------------
+
+- Avoid :code:`UnicodeDecodeError` while trying to :code:`identify` non-N26 files
+
 v0.4.0 (2020-09-13)
 -------------------
 
