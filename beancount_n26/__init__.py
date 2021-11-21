@@ -59,11 +59,14 @@ def _is_language_supported(language: str) -> bool:
 
 
 def _translation_strings_for(language: str) -> Mapping[str, str]:
-    return HEADER_FIELDS[language]
+    return HEADER_FIELDS[language].copy()
 
 
-def _header_values_for(language: str) -> Tuple[str, ...]:
-    return tuple(_translation_strings_for(language).values())
+def _header_values_for(language: str, include_cat: bool) -> Tuple[str, ...]:
+    headers = _translation_strings_for(language)
+    if not include_cat:
+        del headers['category']
+    return tuple(headers.values())
 
 
 class InvalidFormatError(Exception):
@@ -124,11 +127,13 @@ class N26Importer(importer.ImporterProtocol):
         return date
 
     def is_valid_header(self, line: str) -> bool:
-        expected_values = _header_values_for(self.language)
+        expected_values = _header_values_for(self.language, True)
         actual_values = [column.strip('"') for column in line.split(',')]
 
         if len(expected_values) != len(actual_values):
-            return False
+            expected_values = _header_values_for(self.language, False)
+            if len(expected_values) != len(actual_values):
+               return False
 
         for (expected, actual) in zip(expected_values, actual_values):
             if expected != actual:
