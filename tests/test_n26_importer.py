@@ -14,7 +14,7 @@ def _format(string, **kwargs):
     kwargs.update(
         {
             'iban_number': IBAN_NUMBER,
-            'header': ','.join(_header_values_for(kwargs['language'])),
+            'header': ','.join(_header_values_for(kwargs['language'], True)),
         }
     )
 
