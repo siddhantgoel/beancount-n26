@@ -133,7 +133,7 @@ class N26Importer(importer.ImporterProtocol):
         if len(expected_values) != len(actual_values):
             expected_values = _header_values_for(self.language, False)
             if len(expected_values) != len(actual_values):
-               return False
+                return False
 
         for (expected, actual) in zip(expected_values, actual_values):
             if expected != actual:
