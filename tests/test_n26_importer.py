@@ -15,8 +15,10 @@ def _format(string, **kwargs):
         {
             'iban_number': IBAN_NUMBER,
             'header': ','.join(
-              _header_values_for(kwargs['language'],
-                                 kwargs['include_category'])),
+                _header_values_for(
+                    kwargs['language'], kwargs['include_category']
+                )
+            ),
         }
     )
 
