@@ -10,46 +10,85 @@ from beancount.ingest import importer
 
 HEADER_FIELDS = {
     'en': OrderedDict(
-        (
-            ('date', 'Date'),
-            ('payee', 'Payee'),
-            ('account_number', 'Account number'),
-            ('transaction_type', 'Transaction type'),
-            ('payment_reference', 'Payment reference'),
-            ('category', 'Category'),
-            ('amount_eur', 'Amount (EUR)'),
-            ('amount_foreign_currency', 'Amount (Foreign Currency)'),
-            ('type_foreign_currency', 'Type Foreign Currency'),
-            ('exchange_rate', 'Exchange Rate'),
-        )
+        {
+            'date': {'label': 'Date', 'optional': False},
+            'payee': {'label': 'Payee', 'optional': False},
+            'account_number': {'label': 'Account number', 'optional': False},
+            'transaction_type': {
+                'label': 'Transaction type',
+                'optional': False,
+            },
+            'payment_reference': {
+                'label': 'Payment reference',
+                'optional': False,
+            },
+            'category': {'label': 'Category', 'optional': True},
+            'amount_eur': {'label': 'Amount (EUR)', 'optional': False},
+            'amount_foreign_currency': {
+                'label': 'Amount (Foreign Currency)',
+                'optional': False,
+            },
+            'type_foreign_currency': {
+                'label': 'Type Foreign Currency',
+                'optional': False,
+            },
+            'exchange_rate': {'label': 'Exchange Rate', 'optional': False},
+        }
     ),
     'de': OrderedDict(
-        (
-            ('date', 'Datum'),
-            ('payee', 'Empfänger'),
-            ('account_number', 'Kontonummer'),
-            ('transaction_type', 'Transaktionstyp'),
-            ('payment_reference', 'Verwendungszweck'),
-            ('category', 'Kategorie'),
-            ('amount_eur', 'Betrag (EUR)'),
-            ('amount_foreign_currency', 'Betrag (Fremdwährung)'),
-            ('type_foreign_currency', 'Fremdwährung'),
-            ('exchange_rate', 'Wechselkurs'),
-        )
+        {
+            'date': {'label': 'Datum', 'optional': False},
+            'payee': {'label': 'Empfänger', 'optional': False},
+            'account_number': {'label': 'Kontonummer', 'optional': False},
+            'transaction_type': {
+                'label': 'Transaktionstyp',
+                'optional': False,
+            },
+            'payment_reference': {
+                'label': 'Verwendungszweck',
+                'optional': False,
+            },
+            'category': {'label': 'Kategorie', 'optional': True},
+            'amount_eur': {'label': 'Betrag (EUR)', 'optional': False},
+            'amount_foreign_currency': {
+                'label': 'Betrag (Fremdwährung)',
+                'optional': False,
+            },
+            'type_foreign_currency': {
+                'label': 'Fremdwährung',
+                'optional': False,
+            },
+            'exchange_rate': {'label': 'Wechselkurs', 'optional': False},
+        }
     ),
     'fr': OrderedDict(
-        (
-            ('date', 'Date'),
-            ('payee', 'Bénéficiaire'),
-            ('account_number', 'Numéro de compte'),
-            ('transaction_type', 'Type de transaction'),
-            ('payment_reference', 'Référence de paiement'),
-            ('category', 'Catégorie'),
-            ('amount_eur', 'Montant (EUR)'),
-            ('amount_foreign_currency', 'Montant (Devise étrangère)'),
-            ('type_foreign_currency', 'Sélectionnez la devise étrangère'),
-            ('exchange_rate', 'Taux de conversion'),
-        )
+        {
+            'date': {'label': 'Date', 'optional': False},
+            'payee': {'label': 'Bénéficiaire', 'optional': False},
+            'account_number': {'label': 'Numéro de compte', 'optional': False},
+            'transaction_type': {
+                'label': 'Type de transaction',
+                'optional': False,
+            },
+            'payment_reference': {
+                'label': 'Référence de paiement',
+                'optional': False,
+            },
+            'category': {'label': 'Catégorie', 'optional': True},
+            'amount_eur': {'label': 'Montant (EUR)', 'optional': False},
+            'amount_foreign_currency': {
+                'label': 'Montant (Devise étrangère)',
+                'optional': False,
+            },
+            'type_foreign_currency': {
+                'label': 'Sélectionnez la devise étrangère',
+                'optional': False,
+            },
+            'exchange_rate': {
+                'label': 'Taux de conversion',
+                'optional': False,
+            },
+        }
     ),
 }
 
@@ -59,13 +98,19 @@ def _is_language_supported(language: str) -> bool:
 
 
 def _translation_strings_for(language: str) -> Mapping[str, str]:
-    return HEADER_FIELDS[language].copy()
+    return OrderedDict(
+        {k: v['label'] for (k, v) in HEADER_FIELDS[language].items()}
+    )
 
 
-def _header_values_for(language: str, include_cat: bool) -> Tuple[str, ...]:
+def _header_values_for(
+    language: str, include_optional: bool
+) -> Tuple[str, ...]:
     headers = _translation_strings_for(language)
-    if not include_cat:
-        del headers['category']
+    if not include_optional:
+        for k, v in HEADER_FIELDS[language].items():
+            if v['optional']:
+                del headers[k]
     return tuple(headers.values())
 
 
