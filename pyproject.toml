@@ -24,14 +24,14 @@ repository = "https://github.com/siddhantgoel/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.6.2"
 beancount = "^2.2"
 
 [tool.poetry.dev-dependencies]
-flake8 = "^3.7"
-black = {version = "^19.10b0", python = "^3.6"}
-mypy = "^0.770.0"
-pytest = "^5.4.2"
+flake8 = "^4.0"
+black = {version = "^21.12b0", python = "^3.6"}
+mypy = "^0.910"
+pytest = "^6.2"
 
 [tool.black]
 line-length = 79
