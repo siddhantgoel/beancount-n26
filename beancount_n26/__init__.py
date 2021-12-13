@@ -111,7 +111,7 @@ def _header_values_for(
         for k, v in HEADER_FIELDS[language].items():
             if v['optional']:
                 del headers[k]
-    return tuple(headers.values())
+    return headers.values()
 
 
 class InvalidFormatError(Exception):
