@@ -99,7 +99,7 @@ def _is_language_supported(language: str) -> bool:
 
 def _translation_strings_for(language: str) -> Mapping[str, str]:
     return OrderedDict(
-        {k: v['label'] for (k, v) in HEADER_FIELDS[language].items()}
+        ((k, v['label']) for (k, v) in HEADER_FIELDS[language].items())
     )
 
 
