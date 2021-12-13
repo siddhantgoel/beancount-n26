@@ -3,7 +3,7 @@ name = "beancount-n26"
 version = "0.4.1"
 description = "Beancount Importer for N26 CSV exports"
 readme = "README.md"
-authors = ["Siddhant Goel <me@sgoel.org>"]
+authors = ["Siddhant Goel <me@sgoel.dev>"]
 license = "MIT"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -15,6 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Office/Business :: Financial",
     "Topic :: Office/Business :: Financial :: Accounting",
