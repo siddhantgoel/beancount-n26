@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.5.0 (2021-12-13)
+
+- Mark `category` field as optional because recent N26 CSV exports have dropped
+  it (thanks [@ppetru])
+- Drop Python 3.5 support
+
 ## v0.4.1 (2020-12-06)
 
 - Avoid `UnicodeDecodeError` while trying to `identify` non-N26 files
@@ -27,4 +33,5 @@
 - First release
 
 [@ArthurFDLR]: https://github.com/ArthurFDLR
+[@ppetru]: https://github.com/ppetru
 [@tbm]: https://github.com/tbm
