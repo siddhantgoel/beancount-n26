@@ -104,7 +104,7 @@ def _translation_strings_for(language: str) -> Mapping[str, str]:
 
 
 def _header_values_for(
-    language: str, include_optional: bool
+    language: str, include_optional: bool = True
 ) -> Tuple[str, ...]:
     headers = _translation_strings_for(language)
     if not include_optional:
@@ -172,11 +172,13 @@ class N26Importer(importer.ImporterProtocol):
         return date
 
     def is_valid_header(self, line: str) -> bool:
-        expected_values = _header_values_for(self.language, True)
+        expected_values = _header_values_for(self.language)
         actual_values = [column.strip('"') for column in line.split(',')]
 
         if len(expected_values) != len(actual_values):
-            expected_values = _header_values_for(self.language, False)
+            expected_values = _header_values_for(
+                self.language, include_optional=False
+            )
             if len(expected_values) != len(actual_values):
                 return False
 

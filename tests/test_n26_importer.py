@@ -14,11 +14,7 @@ def _format(string, **kwargs):
     kwargs.update(
         {
             'iban_number': IBAN_NUMBER,
-            'header': ','.join(
-                _header_values_for(
-                    kwargs['language'], kwargs['include_optional']
-                )
-            ),
+            'header': ','.join(_header_values_for(**kwargs)),
         }
     )
 
@@ -49,7 +45,6 @@ def test_identify_with_optional(importer, filename):
                 "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","Miscellaneous","-12.34","","",""
                 ''',  # NOQA
                 language=importer.language,
-                include_optional=True,
             )
         )
 
@@ -82,7 +77,6 @@ def test_extract_no_transactions(importer, filename):
                 {header}
                 ''',
                 language=importer.language,
-                include_optional=True,
             )
         )
 
@@ -101,7 +95,6 @@ def test_extract_single_transaction(importer, filename):
                 "2019-10-10","Muster GmbH","{iban_number}","Outgoing Transfer","Muster payment","Miscellaneous","-12.34","","",""
                 ''',  # NOQA
                 language=importer.language,
-                include_optional=True,
             )
         )
 
@@ -133,7 +126,6 @@ def test_extract_multiple_transactions(importer, filename):
                 "2020-01-03","Muster GmbH","{iban_number}","Outgoing Transfer","Muster De payment","Income","-12.34","","",""
                 ''',  # NOQA
                 language=importer.language,
-                include_optional=True,
             )
         )
 
