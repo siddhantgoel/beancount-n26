@@ -2,7 +2,7 @@
 name = "beancount-n26"
 version = "0.4.1"
 description = "Beancount Importer for N26 CSV exports"
-readme = "README.rst"
+readme = "README.md"
 authors = ["Siddhant Goel <me@sgoel.org>"]
 license = "MIT"
 classifiers = [
@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
     "Topic :: Office/Business :: Financial :: Accounting",
 ]
-include = ["README.rst", "LICENSE.txt"]
+include = ["README.md", "LICENSE.txt"]
 repository = "https://github.com/siddhantgoel/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
