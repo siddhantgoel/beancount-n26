@@ -14,7 +14,7 @@ def _format(string, **kwargs):
     kwargs.update(
         {
             'iban_number': IBAN_NUMBER,
-            'header': ','.join(_header_values_for(kwargs['language'])),
+            'header': ','.join(_header_values_for(**kwargs)),
         }
     )
 
@@ -36,7 +36,7 @@ def importer(language):
     return N26Importer(IBAN_NUMBER, 'Assets:N26', language)
 
 
-def test_identify_correct(importer, filename):
+def test_identify_with_optional(importer, filename):
     with open(filename, 'wb') as fd:
         fd.write(
             _format(
@@ -45,6 +45,23 @@ def test_identify_correct(importer, filename):
                 "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","Miscellaneous","-12.34","","",""
                 ''',  # NOQA
                 language=importer.language,
+            )
+        )
+
+    with open(filename) as fd:
+        assert importer.identify(fd)
+
+
+def test_identify_correct_no_optional(importer, filename):
+    with open(filename, 'wb') as fd:
+        fd.write(
+            _format(
+                '''
+                {header}
+                "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","-12.34","","",""
+                ''',  # NOQA
+                language=importer.language,
+                include_optional=False,
             )
         )
 
