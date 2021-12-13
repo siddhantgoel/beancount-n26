@@ -12,7 +12,6 @@ classifiers = [
     "Intended Audience :: Financial and Insurance Industry",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -25,7 +24,7 @@ repository = "https://github.com/siddhantgoel/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
-python = "^3.5"
+python = "^3.6"
 beancount = "^2.2"
 
 [tool.poetry.dev-dependencies]
