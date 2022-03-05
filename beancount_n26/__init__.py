@@ -1,7 +1,9 @@
 from collections import OrderedDict
 import csv
+import re
+import logging
 from datetime import datetime
-from typing import Mapping, Tuple
+from typing import Mapping, Tuple, Dict, List
 
 from beancount.core import data
 from beancount.core.amount import Amount
@@ -123,13 +125,20 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
-        language: str = 'en',
-        file_encoding: str = 'utf-8',
+        language: str = "en",
+        file_encoding: str = "utf-8",
+        account_to_payees: Dict[str, List[str]] = {},
+        fill_default: bool = False,
+        default_tbd_account: str = "Expenses:TBD",
     ):
         self.iban = iban
         self.account = account
         self.language = language
         self.file_encoding = file_encoding
+        self.account_to_payees = account_to_payees
+        self.fill_default = fill_default
+        self.default_tbd_account = default_tbd_account
+        self.regexes = {}
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -137,6 +146,19 @@ class N26Importer(importer.ImporterProtocol):
             )
 
         self._translation_strings = _translation_strings_for(self.language)
+
+        self.payee_to_account = {}
+
+        for account, payees in self.account_to_payees.items():
+            for payee in set(payees):
+                if payee in self.payee_to_account:
+                    logging.warning(f"{payee} in multiple accounts")
+                    self.payee_to_account[payee] = "Expenses:TBD"
+                else:
+                    self.payee_to_account[payee] = account
+
+        for payee, account in self.payee_to_account.items():
+            self.regexes[payee] = re.compile(payee, flags=re.IGNORECASE)
 
     def _translate(self, key):
         return self._translation_strings[key]
@@ -228,6 +250,11 @@ class N26Importer(importer.ImporterProtocol):
                     amount = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
 
+                match = None
+                for payee, prog in self.regexes.items():
+                    if prog.match(line[s_payee]):
+                        match = self.payee_to_account[payee]
+
                 postings = [
                     data.Posting(
                         self.account,
@@ -236,8 +263,19 @@ class N26Importer(importer.ImporterProtocol):
                         None,
                         None,
                         None,
-                    )
+                    ),
                 ]
+                if self.fill_default or match:
+                    postings += [
+                        data.Posting(
+                            match if match else self.default_tbd_account,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                        ),
+                    ]
 
                 entries.append(
                     data.Transaction(
