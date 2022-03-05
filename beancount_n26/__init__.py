@@ -247,10 +247,12 @@ class N26Importer(importer.ImporterProtocol):
                     amount = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
 
-                match = None
+                match = set()
+                payee_matches = set()
                 for payee, prog in self.regexes.items():
                     if prog.match(line[s_payee]):
-                        match = self.payee_to_account[payee]
+                        match.add(self.payee_to_account[payee])
+                        payee_matches.add(payee)
 
                 postings = [
                     data.Posting(
@@ -263,7 +265,7 @@ class N26Importer(importer.ImporterProtocol):
                     ),
                 ]
 
-                if match:
+                if len(match) == 1:
                     postings += [
                         data.Posting(
                             match,
@@ -274,6 +276,8 @@ class N26Importer(importer.ImporterProtocol):
                             None,
                         ),
                     ]
+                elif len(match) > 1:
+                    logging.warning(f"{line[s_payee]} matched {payee_matches}")
 
                 entries.append(
                     data.Transaction(
