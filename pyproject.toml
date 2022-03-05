@@ -1,9 +1,15 @@
 [tool.poetry]
-name = "beancount-n26"
-version = "0.5.0"
-description = "Beancount Importer for N26 CSV exports"
+name = "beancount-n26-with-regexes"
+version = "0.6.0"
+description = """Beancount Importer for N26 CSV exports
+With extended regex classification
+
+Original project:
+https://github.com/siddhantgoel/beancount-n26
+From Siddhant Goel <me@sgoel.dev>
+"""
 readme = "README.md"
-authors = ["Siddhant Goel <me@sgoel.dev>"]
+authors = ["KHUAT DUY Paul"]
 license = "MIT"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -21,7 +27,7 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Accounting",
 ]
 include = ["README.md", "LICENSE.txt"]
-repository = "https://github.com/siddhantgoel/beancount-n26"
+repository = "https://github.com/Eazhi/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
