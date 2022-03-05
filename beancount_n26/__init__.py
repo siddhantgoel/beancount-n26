@@ -1,7 +1,9 @@
 from collections import OrderedDict
 import csv
+import logging
+import re
 from datetime import datetime
-from typing import Mapping, Tuple
+from typing import Mapping, Tuple, Dict, List
 
 from beancount.core import data
 from beancount.core.amount import Amount
@@ -125,11 +127,15 @@ class N26Importer(importer.ImporterProtocol):
         account: str,
         language: str = 'en',
         file_encoding: str = 'utf-8',
+        account_patterns: Dict[str, List[str]] = {},
     ):
         self.iban = iban
         self.account = account
         self.language = language
         self.file_encoding = file_encoding
+        self.account_to_payees = account_patterns
+        self.payee_to_account = {}
+        self.regexes = {}
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -137,6 +143,19 @@ class N26Importer(importer.ImporterProtocol):
             )
 
         self._translation_strings = _translation_strings_for(self.language)
+
+        for account, payees in self.account_to_payees.items():
+            for payee in payees:
+                if payee in self.payee_to_account:
+                    logging.warning(f"{payee} in multiple accounts")
+                    self.payee_to_account[payee] = None
+                else:
+                    self.payee_to_account[payee] = account
+
+        for payee, account in self.payee_to_account.items():
+            if not account:
+                continue  # Account conflict
+            self.regexes[payee] = re.compile(payee, flags=re.IGNORECASE)
 
     def _translate(self, key):
         return self._translation_strings[key]
@@ -228,6 +247,11 @@ class N26Importer(importer.ImporterProtocol):
                     amount = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
 
+                match = None
+                for payee, prog in self.regexes.items():
+                    if prog.match(line[s_payee]):
+                        match = self.payee_to_account[payee]
+
                 postings = [
                     data.Posting(
                         self.account,
@@ -236,8 +260,20 @@ class N26Importer(importer.ImporterProtocol):
                         None,
                         None,
                         None,
-                    )
+                    ),
                 ]
+
+                if match:
+                    postings += [
+                        data.Posting(
+                            match,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                        ),
+                    ]
 
                 entries.append(
                     data.Transaction(
