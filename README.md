@@ -36,6 +36,33 @@ CONFIG = [
 ]
 ```
 
+### Classification
+
+To classify automatically some recurring transactions, one can specify an `account_patterns` as such:
+
+```python
+from beancount_n26 import N26Importer
+
+CONFIG = [
+    N26Importer(
+        IBAN_NUMBER,
+        'Assets:N26',
+        language='en',
+        file_encoding='utf-8',
+        account_patterns={
+           "Expenses:Food:Restaurants": [
+              "amorino",
+              "five guys.*",
+           ]
+        }
+    ),
+]
+```
+
+The keys should be `accounts` while the items in the list are regexes that should match a `payee`.
+
+Some helper functions in `beancount_n26/utils/patterns_generation.py` are here to help you generate this dictionnary.
+
 ## Contributing
 
 Please make sure you have Python 3.6+ and [Poetry] installed.
