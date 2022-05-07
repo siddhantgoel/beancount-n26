@@ -267,7 +267,7 @@ class N26Importer(importer.ImporterProtocol):
                 if len(match) == 1:
                     postings += [
                         data.Posting(
-                            match,
+                            list(match)[0],
                             None,
                             None,
                             None,
