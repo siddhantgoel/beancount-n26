@@ -147,8 +147,7 @@ class N26Importer(importer.ImporterProtocol):
         for account, payees in self.account_to_payees.items():
             for payee in payees:
                 if payee in self.payee_to_account:
-                    logging.warning(f"{payee} in multiple accounts")
-                    self.payee_to_account[payee] = None
+                    raise AssertionError(f"payee in mutliple accounts")
                 else:
                     self.payee_to_account[payee] = account
 
