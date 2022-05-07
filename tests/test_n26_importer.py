@@ -3,7 +3,10 @@ import os.path
 from textwrap import dedent
 
 from beancount.core.number import Decimal
+from beancount.core.data import Transaction
 import pytest
+
+from typing import Optional, List, Tuple
 
 from beancount_n26 import _header_values_for, N26Importer, HEADER_FIELDS
 
@@ -34,6 +37,20 @@ def filename(tmp_path):
 @pytest.fixture
 def importer(language):
     return N26Importer(IBAN_NUMBER, 'Assets:N26', language)
+
+
+@pytest.fixture
+def importer_with_classification(language):
+    return N26Importer(
+        IBAN_NUMBER,
+        "Assets:N26",
+        language,
+        account_patterns={
+            "Expenses:Misc": [
+                "MAX MUSTERMANN",
+            ]
+        },
+    )
 
 
 def test_identify_with_optional(importer, filename):
@@ -86,6 +103,28 @@ def test_extract_no_transactions(importer, filename):
     assert len(transactions) == 0
 
 
+def assert_transaction(
+    transaction: Transaction,
+    date: datetime,
+    payee: str,
+    narration: str,
+    postings: List[Tuple[str, Optional[str], Optional[Decimal]]],
+):
+    assert transaction.date == date
+    assert transaction.payee == payee
+    assert transaction.narration == narration
+
+    assert len(postings) == len(transaction.postings)
+    for expected, actual in zip(postings, transaction.postings):
+        assert actual.account == expected[0]
+        if actual.units is None:
+            assert expected[1] is None
+            assert expected[2] is None
+        else:
+            assert actual.units.currency == expected[1]
+            assert actual.units.number == expected[2]
+
+
 def test_extract_single_transaction(importer, filename):
     with open(filename, 'wb') as fd:
         fd.write(
@@ -105,14 +144,15 @@ def test_extract_single_transaction(importer, filename):
     assert date == datetime.date(2019, 10, 10)
 
     assert len(transactions) == 1
-    assert transactions[0].date == datetime.date(2019, 10, 10)
-    assert transactions[0].payee == 'Muster GmbH'
-    assert transactions[0].narration == 'Muster payment'
-
-    assert len(transactions[0].postings) == 1
-    assert transactions[0].postings[0].account == 'Assets:N26'
-    assert transactions[0].postings[0].units.currency == 'EUR'
-    assert transactions[0].postings[0].units.number == Decimal('-12.34')
+    assert_transaction(
+        transaction=transactions[0],
+        date=datetime.date(2019, 10, 10),
+        payee='Muster GmbH',
+        narration='Muster payment',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-12.34')),
+        ],
+    )
 
 
 def test_extract_multiple_transactions(importer, filename):
@@ -136,35 +176,104 @@ def test_extract_multiple_transactions(importer, filename):
     assert date == datetime.date(2020, 1, 5)
     assert len(transactions) == 3
 
-    # first
+    assert_transaction(
+        transaction=transactions[0],
+        date=datetime.date(2019, 12, 28),
+        payee='MAX MUSTERMANN',
+        narration='Muster GmbH',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-56.78')),
+        ],
+    )
 
-    assert transactions[0].date == datetime.date(2019, 12, 28)
-    assert transactions[0].payee == 'MAX MUSTERMANN'
-    assert transactions[0].narration == 'Muster GmbH'
+    assert_transaction(
+        transaction=transactions[1],
+        date=datetime.date(2020, 1, 5),
+        payee='Muster SARL',
+        narration='Muster Fr payment',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-42.24')),
+        ],
+    )
 
-    assert len(transactions[0].postings) == 1
-    assert transactions[0].postings[0].account == 'Assets:N26'
-    assert transactions[0].postings[0].units.currency == 'EUR'
-    assert transactions[0].postings[0].units.number == Decimal('-56.78')
+    assert_transaction(
+        transaction=transactions[2],
+        date=datetime.date(2020, 1, 3),
+        payee='Muster GmbH',
+        narration='Muster De payment',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-12.34')),
+        ],
+    )
 
-    # second
 
-    assert transactions[1].date == datetime.date(2020, 1, 5)
-    assert transactions[1].payee == 'Muster SARL'
-    assert transactions[1].narration == 'Muster Fr payment'
+def test_extract_multiple_transactions_with_classification(
+    importer_with_classification, filename
+):
+    with open(filename, 'wb') as fd:
+        fd.write(
+            _format(
+                '''
+                {header}
+                "2019-12-28","MAX MUSTERMANN","{iban_number}","Income","Muster GmbH","Income","-56.78","","",""
+                "2020-01-05","Muster SARL","{iban_number}","Outgoing Transfer","Muster Fr payment","Income","-42.24","","",""
+                "2020-01-03","Muster GmbH","{iban_number}","Outgoing Transfer","Muster De payment","Income","-12.34","","",""
+                ''',  # NOQA
+                language=importer_with_classification.language,
+            )
+        )
 
-    assert len(transactions[1].postings) == 1
-    assert transactions[1].postings[0].account == 'Assets:N26'
-    assert transactions[1].postings[0].units.currency == 'EUR'
-    assert transactions[1].postings[0].units.number == Decimal('-42.24')
+    with open(filename) as fd:
+        transactions = importer_with_classification.extract(fd)
+        date = importer_with_classification.file_date(fd)
 
-    # third
+    assert date == datetime.date(2020, 1, 5)
+    assert len(transactions) == 3
 
-    assert transactions[2].date == datetime.date(2020, 1, 3)
-    assert transactions[2].payee == 'Muster GmbH'
-    assert transactions[2].narration == 'Muster De payment'
+    assert_transaction(
+        transaction=transactions[0],
+        date=datetime.date(2019, 12, 28),
+        payee='MAX MUSTERMANN',
+        narration='Muster GmbH',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-56.78')),
+            ('Expenses:Misc', None, None),
+        ],
+    )
 
-    assert len(transactions[2].postings) == 1
-    assert transactions[2].postings[0].account == 'Assets:N26'
-    assert transactions[2].postings[0].units.currency == 'EUR'
-    assert transactions[2].postings[0].units.number == Decimal('-12.34')
+    assert_transaction(
+        transaction=transactions[1],
+        date=datetime.date(2020, 1, 5),
+        payee='Muster SARL',
+        narration='Muster Fr payment',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-42.24')),
+        ],
+    )
+
+    assert_transaction(
+        transaction=transactions[2],
+        date=datetime.date(2020, 1, 3),
+        payee='Muster GmbH',
+        narration='Muster De payment',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('-12.34')),
+        ],
+    )
+
+
+def test_raise_on_payee_in_multiple_accounts(language):
+    with pytest.raises(AssertionError):
+        N26Importer(
+            IBAN_NUMBER,
+            "Assets:N26",
+            language,
+            account_patterns={
+                "Expenses:Misc": [
+                    "MAX MUSTERMANN",
+                ],
+                "Expenses:NotMisc": [
+                    "MAX MUSTERMANN",
+                ],
+            },
+        )
