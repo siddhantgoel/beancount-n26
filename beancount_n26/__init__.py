@@ -133,9 +133,8 @@ class N26Importer(importer.ImporterProtocol):
         self.account = account
         self.language = language
         self.file_encoding = file_encoding
-        self.account_to_payees = account_patterns
         self.payee_to_account = {}
-        self.regexes = {}
+        self.account_regexes = {}
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -144,17 +143,19 @@ class N26Importer(importer.ImporterProtocol):
 
         self._translation_strings = _translation_strings_for(self.language)
 
-        for account, payees in self.account_to_payees.items():
-            for payee in payees:
-                if payee in self.payee_to_account:
-                    raise AssertionError(f"{payee} in mutliple accounts")
-                else:
-                    self.payee_to_account[payee] = account
+        # Validate account/payee regular expressions
 
-        for payee, account in self.payee_to_account.items():
-            if not account:
-                continue  # Account conflict
-            self.regexes[payee] = re.compile(payee, flags=re.IGNORECASE)
+        self.payee_to_account = {}
+        for account, payees in account_patterns.items():
+            for payee in payees:
+                assert payee not in self.payee_to_account, f"{payee} in multiple accounts"
+
+                self.payee_to_account[payee] = account
+
+        self.account_regexes = {
+            payee: re.compile(payee, flags=re.IGNORECASE)
+            for (payee, account) in self.payee_to_account.items()
+        }
 
     def _translate(self, key):
         return self._translation_strings[key]
@@ -248,8 +249,8 @@ class N26Importer(importer.ImporterProtocol):
 
                 match = set()
                 payee_matches = set()
-                for payee, prog in self.regexes.items():
-                    if prog.match(line[s_payee]):
+                for payee, regex in self.account_regexes.items():
+                    if regex.match(line[s_payee]):
                         match.add(self.payee_to_account[payee])
                         payee_matches.add(payee)
 
