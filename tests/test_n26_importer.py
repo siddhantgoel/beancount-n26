@@ -260,3 +260,20 @@ def test_extract_multiple_transactions_with_classification(
             ('Assets:N26', 'EUR', Decimal('-12.34')),
         ],
     )
+
+
+def test_raise_on_payee_in_multiple_accounts(language):
+    with pytest.raises(AssertionError):
+        N26Importer(
+            IBAN_NUMBER,
+            "Assets:N26",
+            language,
+            account_patterns={
+                "Expenses:Misc": [
+                    "MAX MUSTERMANN",
+                ],
+                "Expenses:NotMisc": [
+                    "MAX MUSTERMANN",
+                ],
+            },
+        )
