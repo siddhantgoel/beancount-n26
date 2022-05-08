@@ -151,12 +151,15 @@ class N26Importer(importer.ImporterProtocol):
 
         for account, patterns in account_patterns.items():
             for pattern in patterns:
-                assert pattern not in seen_patterns, f"{pattern} defined in multiple accounts"
+                assert (
+                    pattern not in seen_patterns
+                ), f"{pattern} defined in multiple accounts"
 
                 seen_patterns.add(pattern)
                 self.payee_patterns.add(
                     PayeePattern(
-                        regex=re.compile(pattern, flags=re.IGNORECASE), account=account
+                        regex=re.compile(pattern, flags=re.IGNORECASE),
+                        account=account,
                     )
                 )
 
