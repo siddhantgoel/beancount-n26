@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 import csv
 import logging
 import re
@@ -120,6 +120,9 @@ class InvalidFormatError(Exception):
     pass
 
 
+PayeePattern = namedtuple('PayeePattern', ['regex', 'account'])
+
+
 class N26Importer(importer.ImporterProtocol):
     def __init__(
         self,
@@ -133,8 +136,7 @@ class N26Importer(importer.ImporterProtocol):
         self.account = account
         self.language = language
         self.file_encoding = file_encoding
-        self.payee_to_account = {}
-        self.account_regexes = {}
+        self.payee_patterns = set()
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -143,19 +145,20 @@ class N26Importer(importer.ImporterProtocol):
 
         self._translation_strings = _translation_strings_for(self.language)
 
-        # Validate account/payee regular expressions
+        # Compile account and payee pattern regular expressions
 
-        self.payee_to_account = {}
-        for account, payees in account_patterns.items():
-            for payee in payees:
-                assert payee not in self.payee_to_account, f"{payee} in multiple accounts"
+        seen_patterns = set()
 
-                self.payee_to_account[payee] = account
+        for account, patterns in account_patterns.items():
+            for pattern in patterns:
+                assert pattern not in seen_patterns, f"{pattern} defined in multiple accounts"
 
-        self.account_regexes = {
-            payee: re.compile(payee, flags=re.IGNORECASE)
-            for (payee, account) in self.payee_to_account.items()
-        }
+                seen_patterns.add(pattern)
+                self.payee_patterns.add(
+                    PayeePattern(
+                        regex=re.compile(pattern, flags=re.IGNORECASE), account=account
+                    )
+                )
 
     def _translate(self, key):
         return self._translation_strings[key]
@@ -247,12 +250,11 @@ class N26Importer(importer.ImporterProtocol):
                     amount = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
 
-                match = set()
-                payee_matches = set()
-                for payee, regex in self.account_regexes.items():
-                    if regex.match(line[s_payee]):
-                        match.add(self.payee_to_account[payee])
-                        payee_matches.add(payee)
+                match = None
+
+                for pattern in self.payee_patterns:
+                    if pattern.regex.match(line[s_payee]):
+                        match = pattern.account
 
                 postings = [
                     data.Posting(
@@ -265,10 +267,10 @@ class N26Importer(importer.ImporterProtocol):
                     ),
                 ]
 
-                if len(match) == 1:
+                if match:
                     postings += [
                         data.Posting(
-                            list(match)[0],
+                            match,
                             None,
                             None,
                             None,
@@ -276,8 +278,6 @@ class N26Importer(importer.ImporterProtocol):
                             None,
                         ),
                     ]
-                elif len(match) > 1:
-                    logging.warning(f"{line[s_payee]} matched {payee_matches}")
 
                 entries.append(
                     data.Transaction(
