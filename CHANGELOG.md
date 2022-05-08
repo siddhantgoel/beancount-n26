@@ -22,7 +22,7 @@
 
 ## v0.3.1 (2020-05-12)
 
-- Add optional parameter ing_entries` to `extract()` (thanks [@tbm])
+- Add optional parameter `existing_entries` to `extract()` (thanks [@tbm])
 
 ## v0.3.0 (2020-05-10)
 
