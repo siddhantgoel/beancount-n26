@@ -1,6 +1,5 @@
 from collections import OrderedDict, namedtuple
 import csv
-import logging
 import re
 from datetime import datetime
 from typing import Mapping, Tuple, Dict, List
