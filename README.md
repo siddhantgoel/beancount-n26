@@ -38,7 +38,7 @@ CONFIG = [
 
 ### Classification
 
-To classify automatically some recurring transactions, one can specify an `account_patterns` as such:
+To classify specific recurring transactions automatically, you can specify an `account_patterns` as follows:
 
 ```python
 from beancount_n26 import N26Importer
@@ -59,7 +59,7 @@ CONFIG = [
 ]
 ```
 
-The keys should be `accounts` while the items in the list are regexes that should match a `payee`.
+The keys should be `accounts` while the items in the list are regular expressions that should match a `payee`.
 
 Some helper functions in `beancount_n26/utils/patterns_generation.py` are here to help you generate this dictionnary.
 
