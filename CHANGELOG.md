@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.6.0 (2022-05-08)
+
+- Allow `account_patterns` to automatically classify recurring transactions
+  (thanks [@Eazhi])
+
 ## v0.5.0 (2021-12-13)
 
 - Mark `category` field as optional because recent N26 CSV exports have dropped
@@ -33,5 +38,6 @@
 - First release
 
 [@ArthurFDLR]: https://github.com/ArthurFDLR
+[@Eazhi]: https://github.com/Eazhi
 [@ppetru]: https://github.com/ppetru
 [@tbm]: https://github.com/tbm
