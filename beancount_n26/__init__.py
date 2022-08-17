@@ -230,6 +230,13 @@ class N26Importer(importer.ImporterProtocol):
         if not self.identify(file_):
             return []
 
+        s_amount_eur = self._translate('amount_eur')
+        s_amount_foreign_currency = self._translate('amount_foreign_currency')
+        s_payee = self._translate('payee')
+        s_payment_reference = self._translate('payment_reference')
+        s_type_foreign_currency = self._translate('type_foreign_currency')
+        s_exchange_rate = self._translate('exchange_rate')
+
         with open(file_.name, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
                 fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"'
@@ -237,17 +244,6 @@ class N26Importer(importer.ImporterProtocol):
 
             for index, line in enumerate(reader):
                 meta = data.new_metadata(file_.name, index)
-
-                s_amount_eur = self._translate('amount_eur')
-                s_amount_foreign_currency = self._translate(
-                    'amount_foreign_currency'
-                )
-                s_payee = self._translate('payee')
-                s_payment_reference = self._translate('payment_reference')
-                s_type_foreign_currency = self._translate(
-                    'type_foreign_currency'
-                )
-                s_exchange_rate = self._translate('exchange_rate')
 
                 postings = []
 
