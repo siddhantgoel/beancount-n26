@@ -8,6 +8,7 @@ from beancount.core import data
 from beancount.core.amount import Amount
 from beancount.core.number import Decimal
 from beancount.ingest import importer
+from beancount.core.position import CostSpec
 
 HEADER_FIELDS = {
     'en': OrderedDict(
@@ -127,6 +128,7 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
+        transferwise_fees_account: str,
         language: str = 'en',
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
@@ -136,6 +138,7 @@ class N26Importer(importer.ImporterProtocol):
         self.language = language
         self.file_encoding = file_encoding
         self.payee_patterns = set()
+        self.transferwise_fees_account = transferwise_fees_account
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -244,31 +247,64 @@ class N26Importer(importer.ImporterProtocol):
                 s_type_foreign_currency = self._translate(
                     'type_foreign_currency'
                 )
+                s_exchange_rate = self._translate('exchange_rate')
 
-                if line[s_amount_eur]:
-                    amount = Decimal(line[s_amount_eur])
-                    currency = 'EUR'
-                else:
-                    amount = Decimal(line[s_amount_foreign_currency])
+                postings = []
+
+                if line[s_amount_foreign_currency]:
+                    exchange_rate = Decimal(line[s_exchange_rate])
+                    amount_eur = Decimal(line[s_amount_eur])
+                    amount_foreign = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
 
-                match = None
+                    fees = amount_eur + (amount_foreign / exchange_rate)
 
+                    postings += [
+                        data.Posting(
+                            self.account,
+                            Amount(-fees, 'EUR'),
+                            None,
+                            None,
+                            None,
+                            None,
+                        ),
+                        data.Posting(
+                            self.transferwise_fees_account,
+                            Amount(fees, 'EUR'),
+                            None,
+                            None,
+                            None,
+                            None,
+                        ),
+                        data.Posting(
+                            self.account,
+                            Amount(amount_eur - fees, 'EUR'),
+                            CostSpec(
+                                exchange_rate, None, 'CHF', None, None, None
+                            ),
+                            None,
+                            None,
+                            None,
+                        ),
+                    ]
+                else:
+                    amount = Decimal(line[s_amount_eur])
+
+                    postings += [
+                        data.Posting(
+                            self.account,
+                            Amount(amount, 'EUR'),
+                            None,
+                            None,
+                            None,
+                            None,
+                        ),
+                    ]
+
+                match = None
                 for pattern in self.payee_patterns:
                     if pattern.regex.match(line[s_payee]):
                         match = pattern.account
-
-                postings = [
-                    data.Posting(
-                        self.account,
-                        Amount(amount, currency),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ]
-
                 if match:
                     postings += [
                         data.Posting(
