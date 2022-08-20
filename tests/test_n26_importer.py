@@ -293,6 +293,7 @@ def test_extract_conversion(importer, filename):
                 "2022-08-01","Alice","{iban_number}","Income","Muster GmbH","Income","56.78","","",""
                 "2022-08-02","Bob","{iban_number}","Outgoing Transfer","Home food","Foo","-42.0","","",""
                 "2022-08-03","Charlie","{iban_number}","Outgoing Transfer in a foreign currency","Foreign food","Bar","-10.0","9.13","CHF","0.9687"
+                "2022-08-04","Mustermann GmbH","{iban_number}","-","MasterCard Payment","-","-12.21","-12.21","EUR","1.0"
                 ''',  # NOQA
                 language=importer.language,
             )
@@ -302,8 +303,8 @@ def test_extract_conversion(importer, filename):
         transactions = importer.extract(fd)
         date = importer.file_date(fd)
 
-    assert date == datetime.date(2022, 8, 3)
-    assert len(transactions) == 3
+    assert date == datetime.date(2022, 8, 4)
+    assert len(transactions) == 4
 
     assert_transaction(
         transaction=transactions[0],
@@ -345,3 +346,16 @@ def test_extract_conversion(importer, filename):
             ),
         ],
     )
+
+    assert_transaction(
+        transaction=transactions[3],
+        date=datetime.date(2022, 8, 4),
+        payee='Mustermann GmbH',
+        narration='MasterCard Payment',
+        postings=[
+            ('Assets:N26', 'EUR', Decimal('0')),
+            ('Expenses:TransferWise', 'EUR', Decimal('-0')),
+            ('Assets:N26', 'EUR', Decimal('-12.21') / Decimal('1'), ('EUR', Decimal('1'))),
+        ],
+    )
+
