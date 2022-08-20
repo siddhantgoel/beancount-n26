@@ -276,7 +276,7 @@ class N26Importer(importer.ImporterProtocol):
                             self.account,
                             Amount(amount_eur - fees, 'EUR'),
                             CostSpec(
-                                exchange_rate, None, 'CHF', None, None, None
+                                exchange_rate, None, currency, None, None, None
                             ),
                             None,
                             None,
