@@ -128,7 +128,7 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
-        transferwise_fees_account: str,
+        exchange_fees_account: str,
         language: str = 'en',
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
@@ -138,7 +138,7 @@ class N26Importer(importer.ImporterProtocol):
         self.language = language
         self.file_encoding = file_encoding
         self.payee_patterns = set()
-        self.transferwise_fees_account = transferwise_fees_account
+        self.exchange_fees_account = exchange_fees_account
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -265,7 +265,7 @@ class N26Importer(importer.ImporterProtocol):
                             None,
                         ),
                         data.Posting(
-                            self.transferwise_fees_account,
+                            self.exchange_fees_account,
                             Amount(fees, 'EUR'),
                             None,
                             None,
