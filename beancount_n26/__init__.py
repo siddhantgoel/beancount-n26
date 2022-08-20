@@ -253,7 +253,7 @@ class N26Importer(importer.ImporterProtocol):
                     amount_foreign = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
 
-                    fees = amount_eur + (amount_foreign / exchange_rate)
+                    fees = amount_eur + abs(amount_foreign / exchange_rate)
 
                     postings += [
                         data.Posting(
