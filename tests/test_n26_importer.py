@@ -355,7 +355,11 @@ def test_extract_conversion(importer, filename):
         postings=[
             ('Assets:N26', 'EUR', Decimal('0')),
             ('Expenses:TransferWise', 'EUR', Decimal('-0')),
-            ('Assets:N26', 'EUR', Decimal('-12.21') / Decimal('1'), ('EUR', Decimal('1'))),
+            (
+                'Assets:N26',
+                'EUR',
+                Decimal('-12.21') / Decimal('1'),
+                ('EUR', Decimal('1')),
+            ),
         ],
     )
-
