@@ -128,7 +128,7 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
-        exchange_fees_account: str,
+        exchange_fees_account: str = None,
         language: str = 'en',
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
@@ -256,6 +256,10 @@ class N26Importer(importer.ImporterProtocol):
                     fees = amount_eur + abs(amount_foreign / exchange_rate)
 
                     if fees != 0:
+                        assert (
+                            self.exchange_fees_account
+                        ), "exchange_fees_account required for conversion fees"
+
                         postings += [
                             data.Posting(
                                 self.account,
