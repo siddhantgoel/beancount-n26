@@ -255,23 +255,27 @@ class N26Importer(importer.ImporterProtocol):
 
                     fees = amount_eur + abs(amount_foreign / exchange_rate)
 
+                    if fees != 0:
+                        postings += [
+                            data.Posting(
+                                self.account,
+                                Amount(-fees, 'EUR'),
+                                None,
+                                None,
+                                None,
+                                None,
+                            ),
+                            data.Posting(
+                                self.exchange_fees_account,
+                                Amount(fees, 'EUR'),
+                                None,
+                                None,
+                                None,
+                                None,
+                            ),
+                        ]
+
                     postings += [
-                        data.Posting(
-                            self.account,
-                            Amount(-fees, 'EUR'),
-                            None,
-                            None,
-                            None,
-                            None,
-                        ),
-                        data.Posting(
-                            self.exchange_fees_account,
-                            Amount(fees, 'EUR'),
-                            None,
-                            None,
-                            None,
-                            None,
-                        ),
                         data.Posting(
                             self.account,
                             Amount(amount_eur - fees, 'EUR'),

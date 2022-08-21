@@ -353,8 +353,6 @@ def test_extract_conversion(importer, filename):
         payee='Mustermann GmbH',
         narration='MasterCard Payment',
         postings=[
-            ('Assets:N26', 'EUR', Decimal('0')),
-            ('Expenses:TransferWise', 'EUR', Decimal('-0')),
             (
                 'Assets:N26',
                 'EUR',
