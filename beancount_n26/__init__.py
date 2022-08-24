@@ -2,7 +2,7 @@ from collections import OrderedDict, namedtuple
 import csv
 import re
 from datetime import datetime
-from typing import Mapping, Tuple, Dict, List
+from typing import Mapping, Tuple, Dict, List, Optional
 
 from beancount.core import data
 from beancount.core.amount import Amount
@@ -128,7 +128,7 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
-        exchange_fees_account: str = None,
+        exchange_fees_account: Optional[str] = None,
         language: str = 'en',
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
