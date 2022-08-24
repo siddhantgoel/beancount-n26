@@ -38,7 +38,8 @@ CONFIG = [
 
 ### Classification
 
-To classify specific recurring transactions automatically, you can specify an `account_patterns` as follows:
+To classify specific recurring transactions automatically, you can specify an
+`account_patterns` as follows:
 
 ```python
 from beancount_n26 import N26Importer
@@ -59,9 +60,35 @@ CONFIG = [
 ]
 ```
 
-The keys should be `accounts` while the items in the list are regular expressions that should match a `payee`.
+The keys should be `accounts` while the items in the list are regular
+expressions that should match a `payee`.
 
-Some helper functions in `beancount_n26/utils/patterns_generation.py` are here to help you generate this dictionnary.
+Some helper functions in `beancount_n26/utils/patterns_generation.py` are here
+to help you generate this dictionnary.
+
+### Multiple-currency transactions
+
+To mark transaction fees associated with multiple-currency transactions, you can
+specify the `exchange_fees_account` parameter as follows:
+
+```python
+from beancount_n26 import N26Importer
+
+CONFIG = [
+    N26Importer(
+        IBAN_NUMBER,
+        'Assets:N26',
+        language='en',
+        file_encoding='utf-8',
+        exchange_fees_account='Expenses:TransferWise',
+    ),
+]
+```
+
+With this in place, for transactions where both the amount in EUR and amount in
+foreign currency are given, the importer will calculate the transaction fee
+based on the exchange rate included in the CSV export and automatically allocate
+the value to the account specified in `exchange_fees_account`.
 
 ## Contributing
 
