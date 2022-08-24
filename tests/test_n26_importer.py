@@ -37,7 +37,10 @@ def filename(tmp_path):
 @pytest.fixture
 def importer(language):
     return N26Importer(
-        IBAN_NUMBER, 'Assets:N26', 'Expenses:TransferWise', language
+        IBAN_NUMBER,
+        'Assets:N26',
+        language=language,
+        exchange_fees_account='Expenses:TransferWise',
     )
 
 
@@ -46,7 +49,7 @@ def importer_with_classification(language):
     return N26Importer(
         IBAN_NUMBER,
         "Assets:N26",
-        language,
+        language=language,
         account_patterns={
             "Expenses:Misc": [
                 "MAX MUSTERMANN",
@@ -272,7 +275,7 @@ def test_raise_on_payee_in_multiple_accounts(language):
         N26Importer(
             IBAN_NUMBER,
             "Assets:N26",
-            language,
+            language=language,
             account_patterns={
                 "Expenses:Misc": [
                     "MAX MUSTERMANN",
