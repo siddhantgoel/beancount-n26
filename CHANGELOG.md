@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.7.0 (2022-08-24)
+
+- Allow marking transaction fees for multiple-currency transactions
+  (thanks [@Fumesover])
+
 ## v0.6.0 (2022-05-08)
 
 - Allow `account_patterns` to automatically classify recurring transactions
@@ -39,5 +44,6 @@
 
 [@ArthurFDLR]: https://github.com/ArthurFDLR
 [@Eazhi]: https://github.com/Eazhi
+[@Fumesover]: https://github.com/Fumesover
 [@ppetru]: https://github.com/ppetru
 [@tbm]: https://github.com/tbm
