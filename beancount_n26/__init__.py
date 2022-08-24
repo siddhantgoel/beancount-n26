@@ -128,10 +128,10 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
-        exchange_fees_account: Optional[str] = None,
         language: str = 'en',
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
+        exchange_fees_account: Optional[str] = None,
     ):
         self.iban = iban
         self.account = account
