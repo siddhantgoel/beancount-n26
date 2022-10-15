@@ -32,7 +32,7 @@ beancount = "^2.2"
 flake8 = "^4.0"
 black = {version = "^21.12b0", python = "^3.6"}
 mypy = "^0.910"
-pytest = "^6.2"
+pytest = "^7.0"
 
 [tool.black]
 line-length = 79
