@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.8.0 (2022-12-11)
+
+- Add Python 3.10 support
+- Drop Python 3.6 support
+
 ## v0.7.0 (2022-08-24)
 
 - Allow marking transaction fees for multiple-currency transactions
