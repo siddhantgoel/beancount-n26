@@ -92,7 +92,7 @@ the value to the account specified in `exchange_fees_account`.
 
 ## Contributing
 
-Please make sure you have Python 3.6+ and [Poetry] installed.
+Please make sure you have Python 3.7+ and [Poetry] installed.
 
 1. Git clone the repository -
    `git clone https://github.com/siddhantgoel/beancount-n26`
