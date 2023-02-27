@@ -209,7 +209,7 @@ class N26Importer(importer.ImporterProtocol):
             if len(expected_values) != len(actual_values):
                 return False
 
-        for (expected, actual) in zip(expected_values, actual_values):
+        for expected, actual in zip(expected_values, actual_values):
             if expected != actual:
                 return False
 
