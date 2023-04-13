@@ -30,7 +30,7 @@ beancount = "^2.2"
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0"
 black = {version = "^23.3", python = "^3.7"}
-mypy = "^1.0"
+mypy = "^1.2"
 pytest = "^7.3"
 
 [tool.black]
