@@ -40,7 +40,6 @@ def importer(language):
         IBAN_NUMBER,
         'Assets:N26',
         language=language,
-        exchange_fees_account='Expenses:TransferWise',
     )
 
 
@@ -128,9 +127,6 @@ def assert_transaction(
         else:
             assert actual.units.currency == expected[1]
             assert actual.units.number == expected[2]
-            if len(expected) > 3:
-                assert actual.cost.currency == expected[3][0]
-                assert actual.cost.number_per == expected[3][1]
 
 
 def test_extract_single_transaction(importer, filename):
@@ -295,7 +291,6 @@ def test_extract_conversion(importer, filename):
                 {header}
                 "2022-08-01","Alice","{iban_number}","Income","Muster GmbH","Income","56.78","","",""
                 "2022-08-02","Bob","{iban_number}","Outgoing Transfer","Home food","Foo","-42.0","","",""
-                "2022-08-03","Charlie","{iban_number}","Outgoing Transfer in a foreign currency","Foreign food","Bar","-10.0","9.13","CHF","0.9687"
                 "2022-08-04","Mustermann GmbH","{iban_number}","-","MasterCard Payment","-","-12.21","-12.21","EUR","1.0"
                 ''',  # NOQA
                 language=importer.language,
@@ -307,7 +302,7 @@ def test_extract_conversion(importer, filename):
         date = importer.file_date(fd)
 
     assert date == datetime.date(2022, 8, 4)
-    assert len(transactions) == 4
+    assert len(transactions) == 3
 
     assert_transaction(
         transaction=transactions[0],
@@ -331,27 +326,6 @@ def test_extract_conversion(importer, filename):
 
     assert_transaction(
         transaction=transactions[2],
-        date=datetime.date(2022, 8, 3),
-        payee='Charlie',
-        narration='Foreign food',
-        postings=[
-            ('Assets:N26', 'EUR', Decimal('0.574997419221637245793331269')),
-            (
-                'Expenses:TransferWise',
-                'EUR',
-                Decimal('-0.574997419221637245793331269'),
-            ),
-            (
-                'Assets:N26',
-                'EUR',
-                Decimal('-9.13') / Decimal('0.9687'),
-                ('CHF', Decimal('0.9687')),
-            ),
-        ],
-    )
-
-    assert_transaction(
-        transaction=transactions[3],
         date=datetime.date(2022, 8, 4),
         payee='Mustermann GmbH',
         narration='MasterCard Payment',
