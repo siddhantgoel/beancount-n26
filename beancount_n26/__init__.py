@@ -8,7 +8,6 @@ from beancount.core import data
 from beancount.core.amount import Amount
 from beancount.core.number import Decimal
 from beancount.ingest import importer
-from beancount.core.position import CostSpec
 
 HEADER_FIELDS = {
     'en': OrderedDict(
@@ -132,6 +131,7 @@ class N26Importer(importer.ImporterProtocol):
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
         exchange_fees_account: Optional[str] = None,
+        local_currency: str = "EUR",
     ):
         self.iban = iban
         self.account = account
@@ -139,6 +139,7 @@ class N26Importer(importer.ImporterProtocol):
         self.file_encoding = file_encoding
         self.payee_patterns = set()
         self.exchange_fees_account = exchange_fees_account
+        self.local_currency = local_currency
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -224,10 +225,10 @@ class N26Importer(importer.ImporterProtocol):
         else:
             return self.is_valid_header(line)
 
-    def extract(self, file_, existing_entries=None):
+    def extract(self, file, existing_entries=None):
         entries = []
 
-        if not self.identify(file_):
+        if not self.identify(file):
             return []
 
         s_amount_eur = self._translate('amount_eur')
@@ -237,55 +238,41 @@ class N26Importer(importer.ImporterProtocol):
         s_type_foreign_currency = self._translate('type_foreign_currency')
         s_exchange_rate = self._translate('exchange_rate')
 
-        with open(file_.name, encoding=self.file_encoding) as fd:
+        with open(file.name, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
                 fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
 
             for index, line in enumerate(reader):
-                meta = data.new_metadata(file_.name, index)
+                meta = data.new_metadata(file.name, index)
 
                 postings = []
 
-                if line[s_amount_foreign_currency]:
+                foreign_currency = line[s_type_foreign_currency]
+                if (
+                    foreign_currency != self.local_currency
+                    and line[s_amount_foreign_currency]
+                ):
                     exchange_rate = Decimal(line[s_exchange_rate])
                     amount_eur = Decimal(line[s_amount_eur])
                     amount_foreign = Decimal(line[s_amount_foreign_currency])
-                    currency = line[s_type_foreign_currency]
 
-                    fees = amount_eur + abs(amount_foreign / exchange_rate)
+                    fees = amount_eur + abs(amount_foreign * exchange_rate)
 
-                    if fees != 0:
-                        assert (
-                            self.exchange_fees_account
-                        ), "exchange_fees_account required for conversion fees"
-
-                        postings += [
-                            data.Posting(
-                                self.account,
-                                Amount(-fees, 'EUR'),
-                                None,
-                                None,
-                                None,
-                                None,
-                            ),
-                            data.Posting(
-                                self.exchange_fees_account,
-                                Amount(fees, 'EUR'),
-                                None,
-                                None,
-                                None,
-                                None,
-                            ),
-                        ]
-
+                    assert self.exchange_fees_account
                     postings += [
                         data.Posting(
+                            self.exchange_fees_account,
+                            Amount(abs(amount_foreign), foreign_currency),
+                            None,
+                            Amount(abs(exchange_rate), self.local_currency),
+                            None,
+                            None,
+                        ),
+                        data.Posting(
                             self.account,
-                            Amount(amount_eur - fees, 'EUR'),
-                            CostSpec(
-                                exchange_rate, None, currency, None, None, None
-                            ),
+                            Amount(amount_eur - fees, self.local_currency),
+                            None,
                             None,
                             None,
                             None,
@@ -297,7 +284,7 @@ class N26Importer(importer.ImporterProtocol):
                     postings += [
                         data.Posting(
                             self.account,
-                            Amount(amount, 'EUR'),
+                            Amount(amount, self.local_currency),
                             None,
                             None,
                             None,
@@ -307,19 +294,22 @@ class N26Importer(importer.ImporterProtocol):
 
                 match = None
                 for pattern in self.payee_patterns:
-                    if pattern.regex.match(line[s_payee]):
+                    if pattern.regex.match(
+                        line[s_payee]
+                    ) or pattern.regex.match(line[s_payment_reference]):
                         match = pattern.account
-                if match:
-                    postings += [
-                        data.Posting(
-                            match,
-                            None,
-                            None,
-                            None,
-                            None,
-                            None,
-                        ),
-                    ]
+                    if match:
+                        postings += [
+                            data.Posting(
+                                match,
+                                None,
+                                None,
+                                None,
+                                None,
+                                None,
+                            ),
+                        ]
+                        break
 
                 entries.append(
                     data.Transaction(
