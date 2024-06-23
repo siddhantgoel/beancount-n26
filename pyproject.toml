@@ -25,7 +25,7 @@ keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-beancount = "^2.2"
+beancount = ">=2.2,<4.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0"
