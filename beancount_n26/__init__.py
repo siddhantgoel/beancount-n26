@@ -8,7 +8,6 @@ from beancount.core import data
 from beancount.core.amount import Amount
 from beancount.core.number import Decimal
 from beancount.ingest import importer
-from beancount.core.position import CostSpec
 
 HEADER_FIELDS = {
     'en': OrderedDict(
@@ -131,14 +130,12 @@ class N26Importer(importer.ImporterProtocol):
         language: str = 'en',
         file_encoding: str = 'utf-8',
         account_patterns: Dict[str, List[str]] = {},
-        exchange_fees_account: Optional[str] = None,
     ):
         self.iban = iban
         self.account = account
         self.language = language
         self.file_encoding = file_encoding
         self.payee_patterns = set()
-        self.exchange_fees_account = exchange_fees_account
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
@@ -231,11 +228,8 @@ class N26Importer(importer.ImporterProtocol):
             return []
 
         s_amount_eur = self._translate('amount_eur')
-        s_amount_foreign_currency = self._translate('amount_foreign_currency')
         s_payee = self._translate('payee')
         s_payment_reference = self._translate('payment_reference')
-        s_type_foreign_currency = self._translate('type_foreign_currency')
-        s_exchange_rate = self._translate('exchange_rate')
 
         with open(file_.name, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
@@ -247,63 +241,18 @@ class N26Importer(importer.ImporterProtocol):
 
                 postings = []
 
-                if line[s_amount_foreign_currency]:
-                    exchange_rate = Decimal(line[s_exchange_rate])
-                    amount_eur = Decimal(line[s_amount_eur])
-                    amount_foreign = Decimal(line[s_amount_foreign_currency])
-                    currency = line[s_type_foreign_currency]
+                amount = Decimal(line[s_amount_eur])
 
-                    fees = amount_eur + abs(amount_foreign / exchange_rate)
-
-                    if fees != 0:
-                        assert (
-                            self.exchange_fees_account
-                        ), "exchange_fees_account required for conversion fees"
-
-                        postings += [
-                            data.Posting(
-                                self.account,
-                                Amount(-fees, 'EUR'),
-                                None,
-                                None,
-                                None,
-                                None,
-                            ),
-                            data.Posting(
-                                self.exchange_fees_account,
-                                Amount(fees, 'EUR'),
-                                None,
-                                None,
-                                None,
-                                None,
-                            ),
-                        ]
-
-                    postings += [
-                        data.Posting(
-                            self.account,
-                            Amount(amount_eur - fees, 'EUR'),
-                            CostSpec(
-                                exchange_rate, None, currency, None, None, None
-                            ),
-                            None,
-                            None,
-                            None,
-                        ),
-                    ]
-                else:
-                    amount = Decimal(line[s_amount_eur])
-
-                    postings += [
-                        data.Posting(
-                            self.account,
-                            Amount(amount, 'EUR'),
-                            None,
-                            None,
-                            None,
-                            None,
-                        ),
-                    ]
+                postings += [
+                    data.Posting(
+                        self.account,
+                        Amount(amount, 'EUR'),
+                        None,
+                        None,
+                        None,
+                        None,
+                    ),
+                ]
 
                 match = None
                 for pattern in self.payee_patterns:
