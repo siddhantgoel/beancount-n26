@@ -92,7 +92,7 @@ the value to the account specified in `exchange_fees_account`.
 
 ## Contributing
 
-Please make sure you have Python 3.7+ and [Poetry] installed.
+Please make sure you have Python 3.8+ and [Poetry] installed.
 
 1. Git clone the repository -
    `git clone https://github.com/siddhantgoel/beancount-n26`
@@ -101,7 +101,7 @@ Please make sure you have Python 3.7+ and [Poetry] installed.
    `poetry install`
 
 3. That's basically it. You should now be able to run the test suite -
-   `poetry run py.test`.
+   `poetry run task test`.
 
 [Beancount]: http://furius.ca/beancount/
 [N26]: https://n26.com/
