@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v1.0.0 (TBD)
+
+- Add Beancount 3.x support
+- Rename `account` parameter to `account_name` (overlapping with the `account()` method
+  definition required by `beangulp.importer.Importer`)
+- Add Python 3.11 support
+- Drop Python 3.7 support
+
 ## v0.8.0 (2022-12-11)
 
 - Add Python 3.10 support
