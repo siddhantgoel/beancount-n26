@@ -34,6 +34,16 @@ black = {version = "^23.3", python = "^3.7"}
 mypy = "^1.4"
 pytest = "^7.4"
 
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.13.0"
+
+[tool.taskipy.tasks]
+lint-black = "black --check beancount_n26/ tests/"
+lint-flake8 = "flake8 beancount_n26/ tests/"
+lint = "task lint-black && task lint-flake8"
+
+test = "pytest tests/"
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
