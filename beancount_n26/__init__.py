@@ -11,84 +11,84 @@ from beancount.ingest import importer
 from beancount.core.position import CostSpec
 
 HEADER_FIELDS = {
-    'en': OrderedDict(
+    "en": OrderedDict(
         {
-            'date': {'label': 'Date', 'optional': False},
-            'payee': {'label': 'Payee', 'optional': False},
-            'account_number': {'label': 'Account number', 'optional': False},
-            'transaction_type': {
-                'label': 'Transaction type',
-                'optional': False,
+            "date": {"label": "Date", "optional": False},
+            "payee": {"label": "Payee", "optional": False},
+            "account_number": {"label": "Account number", "optional": False},
+            "transaction_type": {
+                "label": "Transaction type",
+                "optional": False,
             },
-            'payment_reference': {
-                'label': 'Payment reference',
-                'optional': False,
+            "payment_reference": {
+                "label": "Payment reference",
+                "optional": False,
             },
-            'category': {'label': 'Category', 'optional': True},
-            'amount_eur': {'label': 'Amount (EUR)', 'optional': False},
-            'amount_foreign_currency': {
-                'label': 'Amount (Foreign Currency)',
-                'optional': False,
+            "category": {"label": "Category", "optional": True},
+            "amount_eur": {"label": "Amount (EUR)", "optional": False},
+            "amount_foreign_currency": {
+                "label": "Amount (Foreign Currency)",
+                "optional": False,
             },
-            'type_foreign_currency': {
-                'label': 'Type Foreign Currency',
-                'optional': False,
+            "type_foreign_currency": {
+                "label": "Type Foreign Currency",
+                "optional": False,
             },
-            'exchange_rate': {'label': 'Exchange Rate', 'optional': False},
+            "exchange_rate": {"label": "Exchange Rate", "optional": False},
         }
     ),
-    'de': OrderedDict(
+    "de": OrderedDict(
         {
-            'date': {'label': 'Datum', 'optional': False},
-            'payee': {'label': 'Empfänger', 'optional': False},
-            'account_number': {'label': 'Kontonummer', 'optional': False},
-            'transaction_type': {
-                'label': 'Transaktionstyp',
-                'optional': False,
+            "date": {"label": "Datum", "optional": False},
+            "payee": {"label": "Empfänger", "optional": False},
+            "account_number": {"label": "Kontonummer", "optional": False},
+            "transaction_type": {
+                "label": "Transaktionstyp",
+                "optional": False,
             },
-            'payment_reference': {
-                'label': 'Verwendungszweck',
-                'optional': False,
+            "payment_reference": {
+                "label": "Verwendungszweck",
+                "optional": False,
             },
-            'category': {'label': 'Kategorie', 'optional': True},
-            'amount_eur': {'label': 'Betrag (EUR)', 'optional': False},
-            'amount_foreign_currency': {
-                'label': 'Betrag (Fremdwährung)',
-                'optional': False,
+            "category": {"label": "Kategorie", "optional": True},
+            "amount_eur": {"label": "Betrag (EUR)", "optional": False},
+            "amount_foreign_currency": {
+                "label": "Betrag (Fremdwährung)",
+                "optional": False,
             },
-            'type_foreign_currency': {
-                'label': 'Fremdwährung',
-                'optional': False,
+            "type_foreign_currency": {
+                "label": "Fremdwährung",
+                "optional": False,
             },
-            'exchange_rate': {'label': 'Wechselkurs', 'optional': False},
+            "exchange_rate": {"label": "Wechselkurs", "optional": False},
         }
     ),
-    'fr': OrderedDict(
+    "fr": OrderedDict(
         {
-            'date': {'label': 'Date', 'optional': False},
-            'payee': {'label': 'Bénéficiaire', 'optional': False},
-            'account_number': {'label': 'Numéro de compte', 'optional': False},
-            'transaction_type': {
-                'label': 'Type de transaction',
-                'optional': False,
+            "date": {"label": "Date", "optional": False},
+            "payee": {"label": "Bénéficiaire", "optional": False},
+            "account_number": {"label": "Numéro de compte", "optional": False},
+            "transaction_type": {
+                "label": "Type de transaction",
+                "optional": False,
             },
-            'payment_reference': {
-                'label': 'Référence de paiement',
-                'optional': False,
+            "payment_reference": {
+                "label": "Référence de paiement",
+                "optional": False,
             },
-            'category': {'label': 'Catégorie', 'optional': True},
-            'amount_eur': {'label': 'Montant (EUR)', 'optional': False},
-            'amount_foreign_currency': {
-                'label': 'Montant (Devise étrangère)',
-                'optional': False,
+            "category": {"label": "Catégorie", "optional": True},
+            "amount_eur": {"label": "Montant (EUR)", "optional": False},
+            "amount_foreign_currency": {
+                "label": "Montant (Devise étrangère)",
+                "optional": False,
             },
-            'type_foreign_currency': {
-                'label': 'Sélectionnez la devise étrangère',
-                'optional': False,
+            "type_foreign_currency": {
+                "label": "Sélectionnez la devise étrangère",
+                "optional": False,
             },
-            'exchange_rate': {
-                'label': 'Taux de conversion',
-                'optional': False,
+            "exchange_rate": {
+                "label": "Taux de conversion",
+                "optional": False,
             },
         }
     ),
@@ -100,18 +100,14 @@ def _is_language_supported(language: str) -> bool:
 
 
 def _translation_strings_for(language: str) -> Mapping[str, str]:
-    return OrderedDict(
-        ((k, v['label']) for (k, v) in HEADER_FIELDS[language].items())
-    )
+    return OrderedDict(((k, v["label"]) for (k, v) in HEADER_FIELDS[language].items()))
 
 
-def _header_values_for(
-    language: str, include_optional: bool = True
-) -> Tuple[str, ...]:
+def _header_values_for(language: str, include_optional: bool = True) -> Tuple[str, ...]:
     headers = _translation_strings_for(language)
     if not include_optional:
         for k, v in HEADER_FIELDS[language].items():
-            if v['optional']:
+            if v["optional"]:
                 del headers[k]
     return headers.values()
 
@@ -120,7 +116,7 @@ class InvalidFormatError(Exception):
     pass
 
 
-PayeePattern = namedtuple('PayeePattern', ['regex', 'account'])
+PayeePattern = namedtuple("PayeePattern", ["regex", "account"])
 
 
 class N26Importer(importer.ImporterProtocol):
@@ -128,8 +124,8 @@ class N26Importer(importer.ImporterProtocol):
         self,
         iban: str,
         account: str,
-        language: str = 'en',
-        file_encoding: str = 'utf-8',
+        language: str = "en",
+        file_encoding: str = "utf-8",
         account_patterns: Dict[str, List[str]] = {},
         exchange_fees_account: Optional[str] = None,
     ):
@@ -142,7 +138,7 @@ class N26Importer(importer.ImporterProtocol):
 
         if not _is_language_supported(language):
             raise InvalidFormatError(
-                'Language {} is not supported (yet)'.format(language)
+                "Language {} is not supported (yet)".format(language)
             )
 
         self._translation_strings = _translation_strings_for(self.language)
@@ -168,13 +164,11 @@ class N26Importer(importer.ImporterProtocol):
     def _translate(self, key):
         return self._translation_strings[key]
 
-    def _parse_date(self, entry, key='date'):
-        return datetime.strptime(
-            entry[self._translate(key)], '%Y-%m-%d'
-        ).date()
+    def _parse_date(self, entry, key="date"):
+        return datetime.strptime(entry[self._translate(key)], "%Y-%m-%d").date()
 
     def name(self):
-        return 'N26 {}'.format(self.__class__.__name__)
+        return "N26 {}".format(self.__class__.__name__)
 
     def file_account(self, _):
         return self.account
@@ -187,7 +181,7 @@ class N26Importer(importer.ImporterProtocol):
 
         with open(file_.name, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
-                fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"'
+                fd, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
 
             for line in reader:
@@ -200,12 +194,10 @@ class N26Importer(importer.ImporterProtocol):
 
     def is_valid_header(self, line: str) -> bool:
         expected_values = _header_values_for(self.language)
-        actual_values = [column.strip('"') for column in line.split(',')]
+        actual_values = [column.strip('"') for column in line.split(",")]
 
         if len(expected_values) != len(actual_values):
-            expected_values = _header_values_for(
-                self.language, include_optional=False
-            )
+            expected_values = _header_values_for(self.language, include_optional=False)
             if len(expected_values) != len(actual_values):
                 return False
 
@@ -230,16 +222,16 @@ class N26Importer(importer.ImporterProtocol):
         if not self.identify(file_):
             return []
 
-        s_amount_eur = self._translate('amount_eur')
-        s_amount_foreign_currency = self._translate('amount_foreign_currency')
-        s_payee = self._translate('payee')
-        s_payment_reference = self._translate('payment_reference')
-        s_type_foreign_currency = self._translate('type_foreign_currency')
-        s_exchange_rate = self._translate('exchange_rate')
+        s_amount_eur = self._translate("amount_eur")
+        s_amount_foreign_currency = self._translate("amount_foreign_currency")
+        s_payee = self._translate("payee")
+        s_payment_reference = self._translate("payment_reference")
+        s_type_foreign_currency = self._translate("type_foreign_currency")
+        s_exchange_rate = self._translate("exchange_rate")
 
         with open(file_.name, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
-                fd, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"'
+                fd, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
 
             for index, line in enumerate(reader):
@@ -263,7 +255,7 @@ class N26Importer(importer.ImporterProtocol):
                         postings += [
                             data.Posting(
                                 self.account,
-                                Amount(-fees, 'EUR'),
+                                Amount(-fees, "EUR"),
                                 None,
                                 None,
                                 None,
@@ -271,7 +263,7 @@ class N26Importer(importer.ImporterProtocol):
                             ),
                             data.Posting(
                                 self.exchange_fees_account,
-                                Amount(fees, 'EUR'),
+                                Amount(fees, "EUR"),
                                 None,
                                 None,
                                 None,
@@ -282,10 +274,8 @@ class N26Importer(importer.ImporterProtocol):
                     postings += [
                         data.Posting(
                             self.account,
-                            Amount(amount_eur - fees, 'EUR'),
-                            CostSpec(
-                                exchange_rate, None, currency, None, None, None
-                            ),
+                            Amount(amount_eur - fees, "EUR"),
+                            CostSpec(exchange_rate, None, currency, None, None, None),
                             None,
                             None,
                             None,
@@ -297,7 +287,7 @@ class N26Importer(importer.ImporterProtocol):
                     postings += [
                         data.Posting(
                             self.account,
-                            Amount(amount, 'EUR'),
+                            Amount(amount, "EUR"),
                             None,
                             None,
                             None,

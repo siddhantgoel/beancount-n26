@@ -17,9 +17,7 @@ def generate_payees_to_account(main_file: str, dump_file: str):
     transaction it's associated list of accounts
     """
     entries, errors, options = loader.load_file(main_file)
-    transactions = list(
-        filter(lambda x: isinstance(x, data.Transaction), entries)
-    )
+    transactions = list(filter(lambda x: isinstance(x, data.Transaction), entries))
     payees_to_account = defaultdict(set)
     for item in transactions:
         payees_to_account[item.payee.lower() if item.payee else None].add(
@@ -44,9 +42,7 @@ def generate_account_to_payees(main_file: str, dump_file: str):
     transaction it's associated list of payees
     """
     entries, errors, options = loader.load_file(main_file)
-    transactions = list(
-        filter(lambda x: isinstance(x, data.Transaction), entries)
-    )
+    transactions = list(filter(lambda x: isinstance(x, data.Transaction), entries))
     account_to_payees = defaultdict(set)
     for item in transactions:
         account_to_payees[item.postings[1].account].add(
