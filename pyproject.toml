@@ -12,9 +12,10 @@ classifiers = [
     "Intended Audience :: Financial and Insurance Industry",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Office/Business :: Financial",
     "Topic :: Office/Business :: Financial :: Accounting",
@@ -24,18 +25,15 @@ repository = "https://github.com/siddhantgoel/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8.1"
 beancount = "^3.0.0"
 beangulp = "^0.1.1"
 
-[tool.poetry.dev-dependencies]
-flake8 = "^5.0"
-black = {version = "^23.3", python = "^3.7"}
-mypy = "^1.4"
-pytest = "^7.4"
-
 [tool.poetry.group.dev.dependencies]
 taskipy = "^1.13.0"
+black = "^24.4.2"
+flake8 = "^7.1.0"
+pytest = "^8.2.2"
 
 [tool.taskipy.tasks]
 lint-black = "black --check beancount_n26/ tests/"
