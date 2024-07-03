@@ -4,11 +4,11 @@ import re
 from datetime import datetime
 from typing import Mapping, Tuple, Dict, List, Optional
 
-from beancount.core import data
+from beancount.core import data, flags
 from beancount.core.amount import Amount
 from beancount.core.number import Decimal
-from beancount.ingest import importer
 from beancount.core.position import CostSpec
+from beangulp.importer import Importer
 
 HEADER_FIELDS = {
     "en": OrderedDict(
@@ -119,18 +119,18 @@ class InvalidFormatError(Exception):
 PayeePattern = namedtuple("PayeePattern", ["regex", "account"])
 
 
-class N26Importer(importer.ImporterProtocol):
+class N26Importer(Importer):
     def __init__(
         self,
         iban: str,
-        account: str,
+        account_name: str,
         language: str = "en",
         file_encoding: str = "utf-8",
         account_patterns: Dict[str, List[str]] = {},
         exchange_fees_account: Optional[str] = None,
     ):
         self.iban = iban
-        self.account = account
+        self.account_name = account_name
         self.language = language
         self.file_encoding = file_encoding
         self.payee_patterns = set()
@@ -161,6 +161,9 @@ class N26Importer(importer.ImporterProtocol):
                     )
                 )
 
+    def account(self) -> data.Account:
+        return data.Account(self.account_name)
+
     def _translate(self, key):
         return self._translation_strings[key]
 
@@ -170,16 +173,13 @@ class N26Importer(importer.ImporterProtocol):
     def name(self):
         return "N26 {}".format(self.__class__.__name__)
 
-    def file_account(self, _):
-        return self.account
-
-    def file_date(self, file_):
-        if not self.identify(file_):
+    def date(self, filepath: str) -> Optional[datetime.date]:
+        if not self.identify(filepath):
             return None
 
         date = None
 
-        with open(file_.name, encoding=self.file_encoding) as fd:
+        with open(filepath, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
                 fd, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
@@ -207,19 +207,19 @@ class N26Importer(importer.ImporterProtocol):
 
         return True
 
-    def identify(self, file_) -> bool:
+    def identify(self, filepath: str) -> bool:
         try:
-            with open(file_.name, encoding=self.file_encoding) as fd:
+            with open(filepath, encoding=self.file_encoding) as fd:
                 line = fd.readline().strip()
         except ValueError:
             return False
         else:
             return self.is_valid_header(line)
 
-    def extract(self, file_, existing_entries=None):
+    def extract(self, filepath: str, existing: data.Entries = None) -> data.Entries:
         entries = []
 
-        if not self.identify(file_):
+        if not self.identify(filepath):
             return []
 
         s_amount_eur = self._translate("amount_eur")
@@ -229,13 +229,13 @@ class N26Importer(importer.ImporterProtocol):
         s_type_foreign_currency = self._translate("type_foreign_currency")
         s_exchange_rate = self._translate("exchange_rate")
 
-        with open(file_.name, encoding=self.file_encoding) as fd:
+        with open(filepath, encoding=self.file_encoding) as fd:
             reader = csv.DictReader(
                 fd, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
 
             for index, line in enumerate(reader):
-                meta = data.new_metadata(file_.name, index)
+                meta = data.new_metadata(filepath, index)
 
                 postings = []
 
@@ -254,7 +254,7 @@ class N26Importer(importer.ImporterProtocol):
 
                         postings += [
                             data.Posting(
-                                self.account,
+                                self.account(),
                                 Amount(-fees, "EUR"),
                                 None,
                                 None,
@@ -273,7 +273,7 @@ class N26Importer(importer.ImporterProtocol):
 
                     postings += [
                         data.Posting(
-                            self.account,
+                            self.account(),
                             Amount(amount_eur - fees, "EUR"),
                             CostSpec(exchange_rate, None, currency, None, None, None),
                             None,
@@ -286,7 +286,7 @@ class N26Importer(importer.ImporterProtocol):
 
                     postings += [
                         data.Posting(
-                            self.account,
+                            self.account(),
                             Amount(amount, "EUR"),
                             None,
                             None,
@@ -315,7 +315,7 @@ class N26Importer(importer.ImporterProtocol):
                     data.Transaction(
                         meta,
                         self._parse_date(line),
-                        self.FLAG,
+                        flags.FLAG_OKAY,
                         line[s_payee],
                         line[s_payment_reference],
                         data.EMPTY_SET,

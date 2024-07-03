@@ -70,8 +70,7 @@ def test_identify_with_optional(importer, filename):
             )
         )
 
-    with open(filename) as fd:
-        assert importer.identify(fd)
+    assert importer.identify(filename)
 
 
 def test_identify_correct_no_optional(importer, filename):
@@ -87,8 +86,7 @@ def test_identify_correct_no_optional(importer, filename):
             )
         )
 
-    with open(filename) as fd:
-        assert importer.identify(fd)
+    assert importer.identify(filename)
 
 
 def test_extract_no_transactions(importer, filename):
@@ -102,8 +100,7 @@ def test_extract_no_transactions(importer, filename):
             )
         )
 
-    with open(filename) as fd:
-        transactions = importer.extract(fd)
+    transactions = importer.extract(filename)
 
     assert len(transactions) == 0
 
@@ -145,9 +142,8 @@ def test_extract_single_transaction(importer, filename):
             )
         )
 
-    with open(filename) as fd:
-        transactions = importer.extract(fd)
-        date = importer.file_date(fd)
+    transactions = importer.extract(filename)
+    date = importer.date(filename)
 
     assert date == datetime.date(2019, 10, 10)
 
@@ -177,9 +173,8 @@ def test_extract_multiple_transactions(importer, filename):
             )
         )
 
-    with open(filename) as fd:
-        transactions = importer.extract(fd)
-        date = importer.file_date(fd)
+    transactions = importer.extract(filename)
+    date = importer.date(filename)
 
     assert date == datetime.date(2020, 1, 5)
     assert len(transactions) == 3
@@ -231,9 +226,8 @@ def test_extract_multiple_transactions_with_classification(
             )
         )
 
-    with open(filename) as fd:
-        transactions = importer_with_classification.extract(fd)
-        date = importer_with_classification.file_date(fd)
+    transactions = importer_with_classification.extract(filename)
+    date = importer_with_classification.date(filename)
 
     assert date == datetime.date(2020, 1, 5)
     assert len(transactions) == 3
@@ -302,9 +296,8 @@ def test_extract_conversion(importer, filename):
             )
         )
 
-    with open(filename) as fd:
-        transactions = importer.extract(fd)
-        date = importer.file_date(fd)
+    transactions = importer.extract(filename)
+    date = importer.date(filename)
 
     assert date == datetime.date(2022, 8, 4)
     assert len(transactions) == 4
