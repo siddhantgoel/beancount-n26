@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## v1.0.0 (TBD)
+## v1.0.0 (2024-07-07)
 
-- Add Beancount 3.x support
+- Add Beancount 3.x support (thus removing Beancount 2.x support)
 - Add `beancount-n26` CLI command
 - Rename `account` parameter to `account_name` (overlapping with the `account()` method
   definition required by `beangulp.importer.Importer`)
