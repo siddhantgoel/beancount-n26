@@ -161,7 +161,7 @@ class N26Importer(Importer):
                     )
                 )
 
-    def account(self) -> data.Account:
+    def account(self, _) -> data.Account:
         return data.Account(self.account_name)
 
     def _translate(self, key):
@@ -254,7 +254,7 @@ class N26Importer(Importer):
 
                         postings += [
                             data.Posting(
-                                self.account(),
+                                self.account(filepath),
                                 Amount(-fees, "EUR"),
                                 None,
                                 None,
@@ -273,7 +273,7 @@ class N26Importer(Importer):
 
                     postings += [
                         data.Posting(
-                            self.account(),
+                            self.account(filepath),
                             Amount(amount_eur - fees, "EUR"),
                             CostSpec(exchange_rate, None, currency, None, None, None),
                             None,
@@ -286,7 +286,7 @@ class N26Importer(Importer):
 
                     postings += [
                         data.Posting(
-                            self.account(),
+                            self.account(filepath),
                             Amount(amount, "EUR"),
                             None,
                             None,
