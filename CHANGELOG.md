@@ -3,6 +3,7 @@
 ## v1.0.0 (TBD)
 
 - Add Beancount 3.x support
+- Add `beancount-n26` CLI command
 - Rename `account` parameter to `account_name` (overlapping with the `account()` method
   definition required by `beangulp.importer.Importer`)
 - Add Python 3.11 support
