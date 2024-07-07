@@ -17,17 +17,19 @@
 $ pip install beancount-n26
 ```
 
-In case you prefer installing from the Github repository, please note that
-`main` is the development branch so `stable` is what you should be installing
-from.
+In case you prefer installing from the Github repository, please note that `main` is the
+development branch so `stable` is what you should be installing from.
+
+Note that v1.x will *only* work with Beancount 3.x, while v0.x will *only* work with
+Beancount 2.x, due to incompatibilities between Beancount 3.x and 2.x.
 
 ## Usage
 
 ### Beancount 3.x
 
 Beancount 3.x has replaced the `config.py` file based workflow in favor of having a
-script based workflow, as per the [changes documented here]. As a result, the
-initialization parameters have been shifted to `pyproject.toml` file.
+script based workflow, as per the [changes documented here]. As a result, the importer's
+initialization parameters have been shifted to `pyproject.toml`.
 
 Add the following to your `pyproject.toml` in your project root.
 
@@ -79,10 +81,7 @@ from beancount_n26 import N26Importer
 
 CONFIG = [
     N26Importer(
-        IBAN_NUMBER,
-        'Assets:N26',
-        language='en',
-        file_encoding='utf-8',
+        ...
         account_patterns={"Expenses:Supermarket": ["REWE", "ALDI"]}
     ),
 ]
@@ -120,10 +119,10 @@ CONFIG = [
 ]
 ```
 
-With this in place, for transactions where both the amount in EUR and amount in
-foreign currency are given, the importer will calculate the transaction fee
-based on the exchange rate included in the CSV export and automatically allocate
-the value to the account specified in `exchange_fees_account`.
+With this in place, for transactions where both the amount in EUR and amount in foreign
+currency are given, the importer will calculate the transaction fee based on the
+exchange rate included in the CSV export and automatically allocate the value to the
+account specified in `exchange_fees_account`.
 
 ## Contributing
 
