@@ -35,6 +35,9 @@ black = "^24.4.2"
 flake8 = "^7.1.0"
 pytest = "^8.2.2"
 
+[tool.poetry.scripts]
+beancount-n26 = "beancount_n26.cli:main"
+
 [tool.taskipy.tasks]
 lint-black = "black --check beancount_n26/ tests/"
 lint-flake8 = "flake8 beancount_n26/ tests/"
@@ -43,5 +46,5 @@ lint = "task lint-black && task lint-flake8"
 test = "pytest tests/"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
