@@ -23,6 +23,26 @@ from.
 
 ## Usage
 
+### Beancount 3.x
+
+Beancount 3.x has replaced the `config.py` file based workflow in favor of having a
+script based workflow, as per the [changes documented here]. As a result, the
+initialization parameters have been shifted to `pyproject.toml` file.
+
+Add the following to your `pyproject.toml` in your project root.
+
+```toml
+[tool.beancount-n26]
+ibn = "IBAN_NUMBER" # required
+account_name = "Assets:N26" # required
+language = "en"
+file_encoding = "utf-8"
+```
+
+### Beancount 2.x
+
+Add the following to your `config.py`.
+
 ```python
 from beancount_n26 import N26Importer
 
@@ -39,7 +59,20 @@ CONFIG = [
 ### Classification
 
 To classify specific recurring transactions automatically, you can specify an
-`account_patterns` as follows:
+`account_patterns` parameter. The key should be the account name and the items in the
+list are regular expressions that should match a `payee`.
+
+A few helper functions have been provided in
+`beancount_n26/utils/patterns_generation.py` to help you generate this dictionnary.
+
+#### Beancount 3.x
+
+```toml
+[tool.beancount-n26.account_patterns]
+"Expenses:Supermarket" = ["REWE", "ALDI"]
+```
+
+#### Beancount 2.x
 
 ```python
 from beancount_n26 import N26Importer
@@ -50,26 +83,28 @@ CONFIG = [
         'Assets:N26',
         language='en',
         file_encoding='utf-8',
-        account_patterns={
-           "Expenses:Food:Restaurants": [
-              "amorino",
-              "five guys.*",
-           ]
-        }
+        account_patterns={"Expenses:Supermarket": ["REWE", "ALDI"]}
     ),
 ]
 ```
 
-The keys should be `accounts` while the items in the list are regular
-expressions that should match a `payee`.
-
-Some helper functions in `beancount_n26/utils/patterns_generation.py` are here
-to help you generate this dictionnary.
-
 ### Multiple-currency transactions
 
 To mark transaction fees associated with multiple-currency transactions, you can
-specify the `exchange_fees_account` parameter as follows:
+specify the `exchange_fees_account` parameter.
+
+#### Beancount 3.x
+
+```toml
+[tool.beancount-n26]
+ibn = "IBAN_NUMBER" # required
+account_name = "Assets:N26" # required
+language = "en"
+file_encoding = "utf-8"
+exchange_fees_account = "Expenses:TransferWise"
+```
+
+#### Beancount 2.x
 
 ```python
 from beancount_n26 import N26Importer
@@ -105,4 +140,5 @@ Please make sure you have Python 3.8+ and [Poetry] installed.
 
 [Beancount]: http://furius.ca/beancount/
 [N26]: https://n26.com/
-[Poetry]: https://poetry.eustace.io/
+[Poetry]: https://python-poetry.org/
+[changes documented here]: https://docs.google.com/document/d/1O42HgYQBQEna6YpobTqszSgTGnbRX7RdjmzR2xumfjs/edit#heading=h.hjzt0c6v8pfs
