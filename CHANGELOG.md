@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.1.0 (2024-07-09)
+
+- Rename `beancount-n26` command to `beancount-n26-ec`
+
 ## v1.0.0 (2024-07-07)
 
 - Add Beancount 3.x support (thus removing Beancount 2.x support)
