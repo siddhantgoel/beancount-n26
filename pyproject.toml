@@ -36,7 +36,7 @@ flake8 = "^7.1.0"
 pytest = "^8.2.2"
 
 [tool.poetry.scripts]
-beancount-n26 = "beancount_n26.cli:main"
+beancount-n26-ec = "beancount_n26.cli:ec"
 
 [tool.taskipy.tasks]
 lint-black = "black --check beancount_n26/ tests/"

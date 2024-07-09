@@ -6,8 +6,8 @@ from beangulp.testing import main as bg_main
 from beancount_n26 import N26Importer
 
 
-def main():
-    config = _extract_config()
+def ec():
+    config = _extract_config("ec")
 
     iban = config["iban"]
     account_name = config["account_name"]
@@ -27,7 +27,7 @@ def main():
     bg_main(importer)
 
 
-def _extract_config():
+def _extract_config(section: str):
     pyproject = Path("pyproject.toml")
 
     if not pyproject.exists():
@@ -37,10 +37,10 @@ def _extract_config():
     with pyproject.open("rb") as fd:
         config = tomllib.load(fd)
 
-    config_n26 = config.get("tool", {}).get("beancount-n26")
+    config_section = config.get("tool", {}).get("beancount-n26", {}).get(section)
 
-    if not config_n26:
+    if not config_section:
         print("tool.beancount-n26 not found in pyproject.toml.")
         sys.exit(1)
 
-    return config_n26
+    return config_section
