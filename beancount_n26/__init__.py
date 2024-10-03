@@ -10,86 +10,51 @@ from beancount.core.number import Decimal
 from beancount.core.position import CostSpec
 from beangulp.importer import Importer
 
+HeaderField = namedtuple("HeaderField", ["label", "optional"])
+
 HEADER_FIELDS = {
     "en": OrderedDict(
         {
-            "date": {"label": "Date", "optional": False},
-            "payee": {"label": "Payee", "optional": False},
-            "account_number": {"label": "Account number", "optional": False},
-            "transaction_type": {
-                "label": "Transaction type",
-                "optional": False,
-            },
-            "payment_reference": {
-                "label": "Payment reference",
-                "optional": False,
-            },
-            "category": {"label": "Category", "optional": True},
-            "amount_eur": {"label": "Amount (EUR)", "optional": False},
-            "amount_foreign_currency": {
-                "label": "Amount (Foreign Currency)",
-                "optional": False,
-            },
-            "type_foreign_currency": {
-                "label": "Type Foreign Currency",
-                "optional": False,
-            },
-            "exchange_rate": {"label": "Exchange Rate", "optional": False},
+            "date": HeaderField("Date", False),
+            "payee": HeaderField("Payee", False),
+            "account_number": HeaderField("Account number", False),
+            "transaction_type": HeaderField("Transaction type", False),
+            "payment_reference": HeaderField("Payment reference", False),
+            "category": HeaderField("Category", True),
+            "amount_eur": HeaderField("Amount (EUR)", False),
+            "amount_foreign_currency": HeaderField("Amount (Foreign Currency)", False),
+            "type_foreign_currency": HeaderField("Type Foreign Currency", False),
+            "exchange_rate": HeaderField("Exchange Rate", False),
         }
     ),
     "de": OrderedDict(
         {
-            "date": {"label": "Datum", "optional": False},
-            "payee": {"label": "Empfänger", "optional": False},
-            "account_number": {"label": "Kontonummer", "optional": False},
-            "transaction_type": {
-                "label": "Transaktionstyp",
-                "optional": False,
-            },
-            "payment_reference": {
-                "label": "Verwendungszweck",
-                "optional": False,
-            },
-            "category": {"label": "Kategorie", "optional": True},
-            "amount_eur": {"label": "Betrag (EUR)", "optional": False},
-            "amount_foreign_currency": {
-                "label": "Betrag (Fremdwährung)",
-                "optional": False,
-            },
-            "type_foreign_currency": {
-                "label": "Fremdwährung",
-                "optional": False,
-            },
-            "exchange_rate": {"label": "Wechselkurs", "optional": False},
+            "date": HeaderField("Datum", False),
+            "payee": HeaderField("Empfänger", False),
+            "account_number": HeaderField("Kontonummer", False),
+            "transaction_type": HeaderField("Transaktionstyp", False),
+            "payment_reference": HeaderField("Verwendungszweck", False),
+            "category": HeaderField("Kategorie", True),
+            "amount_eur": HeaderField("Betrag (EUR)", False),
+            "amount_foreign_currency": HeaderField("Betrag (Fremdwährung)", False),
+            "type_foreign_currency": HeaderField("Fremdwährung", False),
+            "exchange_rate": HeaderField("Wechselkurs", False),
         }
     ),
     "fr": OrderedDict(
         {
-            "date": {"label": "Date", "optional": False},
-            "payee": {"label": "Bénéficiaire", "optional": False},
-            "account_number": {"label": "Numéro de compte", "optional": False},
-            "transaction_type": {
-                "label": "Type de transaction",
-                "optional": False,
-            },
-            "payment_reference": {
-                "label": "Référence de paiement",
-                "optional": False,
-            },
-            "category": {"label": "Catégorie", "optional": True},
-            "amount_eur": {"label": "Montant (EUR)", "optional": False},
-            "amount_foreign_currency": {
-                "label": "Montant (Devise étrangère)",
-                "optional": False,
-            },
-            "type_foreign_currency": {
-                "label": "Sélectionnez la devise étrangère",
-                "optional": False,
-            },
-            "exchange_rate": {
-                "label": "Taux de conversion",
-                "optional": False,
-            },
+            "date": HeaderField("Date", False),
+            "payee": HeaderField("Bénéficiaire", False),
+            "account_number": HeaderField("Numéro de compte", False),
+            "transaction_type": HeaderField("Type de transaction", False),
+            "payment_reference": HeaderField("Référence de paiement", False),
+            "category": HeaderField("Catégorie", True),
+            "amount_eur": HeaderField("Montant (EUR)", False),
+            "amount_foreign_currency": HeaderField("Montant (Devise étrangère)", False),
+            "type_foreign_currency": HeaderField(
+                "Sélectionnez la devise étrangère", False
+            ),
+            "exchange_rate": HeaderField("Taux de conversion", False),
         }
     ),
 }
@@ -100,15 +65,19 @@ def _is_language_supported(language: str) -> bool:
 
 
 def _translation_strings_for(language: str) -> Mapping[str, str]:
-    return OrderedDict(((k, v["label"]) for (k, v) in HEADER_FIELDS[language].items()))
+    return OrderedDict(
+        ((key, value.label) for (key, value) in HEADER_FIELDS[language].items())
+    )
 
 
 def _header_values_for(language: str, include_optional: bool = True) -> Tuple[str, ...]:
     headers = _translation_strings_for(language)
+
     if not include_optional:
-        for k, v in HEADER_FIELDS[language].items():
-            if v["optional"]:
-                del headers[k]
+        for key, value in HEADER_FIELDS[language].items():
+            if value.optional:
+                del headers[key]
+
     return headers.values()
 
 
