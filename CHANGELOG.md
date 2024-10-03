@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.2.0 (2024-10-03)
+
+- Support updated headers
+
 ## v1.1.0 (2024-07-09)
 
 - Rename `beancount-n26` command to `beancount-n26-ec`
