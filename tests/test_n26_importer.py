@@ -26,37 +26,18 @@ def _format(string, **kwargs):
     return dedent(string).format(**kwargs).lstrip().encode("utf-8")
 
 
-@pytest.fixture(params=HEADER_FIELDS.keys())
-def language(request):
-    return request.param
-
-
 @pytest.fixture
 def filename(tmp_path):
     return os.path.join(str(tmp_path), "{}.csv".format(IBAN_NUMBER))
 
 
 @pytest.fixture
-def importer(language):
+def importer():
     return N26Importer(
         IBAN_NUMBER,
         "Assets:N26",
-        language=language,
+        language="en",
         exchange_fees_account="Expenses:Exchange",
-    )
-
-
-@pytest.fixture
-def importer_with_classification(language):
-    return N26Importer(
-        IBAN_NUMBER,
-        "Assets:N26",
-        language=language,
-        account_patterns={
-            "Expenses:Misc": [
-                "MAX MUSTERMANN",
-            ]
-        },
     )
 
 
@@ -65,7 +46,7 @@ def test_identify_with_optional(importer, filename):
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","Miscellaneous","-12.34","","",""
                 """,  # NOQA
                 language=importer.language,
@@ -75,16 +56,49 @@ def test_identify_with_optional(importer, filename):
     assert importer.identify(filename)
 
 
-def test_identify_correct_no_optional(importer, filename):
+def test_identify_without_optional(importer, filename):
     with open(filename, "wb") as fd:
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","-12.34","","",""
                 """,  # NOQA
                 language=importer.language,
-                include_optional=False,
+            )
+        )
+
+    assert importer.identify(filename)
+
+
+def test_identify_german(importer, filename):
+    importer.language = "de"
+
+    with open(filename, "wb") as fd:
+        fd.write(
+            _format(
+                """
+                "Datum","Empfänger","Kontonummer","Transaktionstyp","Verwendungszweck","Kategorie","Betrag (EUR)","Betrag (Fremdwährung)","Fremdwährung","Wechselkurs"
+                "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","-12.34","","",""
+                """,  # NOQA
+                language=importer.language,
+            )
+        )
+
+    assert importer.identify(filename)
+
+
+def test_identify_french(importer, filename):
+    importer.language = "fr"
+
+    with open(filename, "wb") as fd:
+        fd.write(
+            _format(
+                """
+                "Date","Bénéficiaire","Numéro de compte","Type de transaction","Référence de paiement","Catégorie","Montant (EUR)","Montant (Devise étrangère)","Sélectionnez la devise étrangère","Taux de conversion"
+                "2019-10-10","MAX MUSTERMANN","{iban_number}","Outgoing Transfer","Muster GmbH","-12.34","","",""
+                """,  # NOQA
+                language=importer.language,
             )
         )
 
@@ -96,7 +110,7 @@ def test_extract_no_transactions(importer, filename):
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 """,
                 language=importer.language,
             )
@@ -137,7 +151,7 @@ def test_extract_single_transaction(importer, filename):
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 "2019-10-10","Muster GmbH","{iban_number}","Outgoing Transfer","Muster payment","Miscellaneous","-12.34","","",""
                 """,  # NOQA
                 language=importer.language,
@@ -166,7 +180,7 @@ def test_extract_multiple_transactions(importer, filename):
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 "2019-12-28","MAX MUSTERMANN","{iban_number}","Income","Muster GmbH","Income","-56.78","","",""
                 "2020-01-05","Muster SARL","{iban_number}","Outgoing Transfer","Muster Fr payment","Income","-42.24","","",""
                 "2020-01-03","Muster GmbH","{iban_number}","Outgoing Transfer","Muster De payment","Income","-12.34","","",""
@@ -212,24 +226,33 @@ def test_extract_multiple_transactions(importer, filename):
     )
 
 
-def test_extract_multiple_transactions_with_classification(
-    importer_with_classification, filename
-):
+def test_extract_multiple_transactions_with_classification(filename):
+    importer = N26Importer(
+        IBAN_NUMBER,
+        "Assets:N26",
+        language="en",
+        account_patterns={
+            "Expenses:Misc": [
+                "MAX MUSTERMANN",
+            ]
+        },
+    )
+
     with open(filename, "wb") as fd:
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 "2019-12-28","MAX MUSTERMANN","{iban_number}","Income","Muster GmbH","Income","-56.78","","",""
                 "2020-01-05","Muster SARL","{iban_number}","Outgoing Transfer","Muster Fr payment","Income","-42.24","","",""
                 "2020-01-03","Muster GmbH","{iban_number}","Outgoing Transfer","Muster De payment","Income","-12.34","","",""
                 """,  # NOQA
-                language=importer_with_classification.language,
+                language=importer.language,
             )
         )
 
-    transactions = importer_with_classification.extract(filename)
-    date = importer_with_classification.date(filename)
+    transactions = importer.extract(filename)
+    date = importer.date(filename)
 
     assert date == datetime.date(2020, 1, 5)
     assert len(transactions) == 3
@@ -266,6 +289,7 @@ def test_extract_multiple_transactions_with_classification(
     )
 
 
+@pytest.mark.parametrize("language", HEADER_FIELDS.keys())
 def test_raise_on_payee_in_multiple_accounts(language):
     with pytest.raises(AssertionError):
         N26Importer(
@@ -288,7 +312,7 @@ def test_extract_conversion(importer, filename):
         fd.write(
             _format(
                 """
-                {header}
+                "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
                 "2022-08-01","Alice","{iban_number}","Income","Muster GmbH","Income","56.78","","",""
                 "2022-08-02","Bob","{iban_number}","Outgoing Transfer","Home food","Foo","-42.0","","",""
                 "2022-08-03","Charlie","{iban_number}","Outgoing Transfer in a foreign currency","Foreign food","Bar","-10.0","9.13","CHF","0.9687"
@@ -357,5 +381,34 @@ def test_extract_conversion(importer, filename):
                 Decimal("-12.21") / Decimal("1"),
                 ("EUR", Decimal("1")),
             ),
+        ],
+    )
+
+
+def test_extract_updated_header(importer, filename):
+    with open(filename, "wb") as fd:
+        fd.write(
+            _format(
+                """
+                "Booking Date","Value Date","Partner Name","Partner Iban",Type,"Payment Reference","Account Name","Amount (EUR)","Original Amount","Original Currency","Exchange Rate"
+                2019-10-10,2019-10-10,Muster GmbH,{iban_number},Presentment,Muster payment,"Main Account",-12.34,,,
+                """,  # NOQA
+                language=importer.language,
+            )
+        )
+
+    transactions = importer.extract(filename)
+    date = importer.date(filename)
+
+    assert date == datetime.date(2019, 10, 10)
+
+    assert len(transactions) == 1
+    assert_transaction(
+        transaction=transactions[0],
+        date=datetime.date(2019, 10, 10),
+        payee="Muster GmbH",
+        narration="Muster payment",
+        postings=[
+            ("Assets:N26", "EUR", Decimal("-12.34")),
         ],
     )
