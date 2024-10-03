@@ -1,6 +1,7 @@
 import datetime
 import os.path
 from textwrap import dedent
+import random
 
 from beancount.core.number import Decimal
 from beancount.core.data import Transaction
@@ -14,10 +15,12 @@ IBAN_NUMBER = "DE99 9999 9999 9999 9999 99".replace(" ", "")
 
 
 def _format(string, **kwargs):
+    header = _header_values_for(**kwargs)
+
     kwargs.update(
         {
             "iban_number": IBAN_NUMBER,
-            "header": ",".join(_header_values_for(**kwargs)),
+            "header": ",".join(random.choice(header)),
         }
     )
 

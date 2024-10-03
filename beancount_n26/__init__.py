@@ -2,7 +2,7 @@ from collections import OrderedDict, namedtuple
 import csv
 import re
 from datetime import datetime
-from typing import Mapping, Tuple, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from beancount.core import data, flags
 from beancount.core.amount import Amount
@@ -13,49 +13,75 @@ from beangulp.importer import Importer
 HeaderField = namedtuple("HeaderField", ["label", "optional"])
 
 HEADER_FIELDS = {
-    "en": OrderedDict(
-        {
-            "date": HeaderField("Date", False),
-            "payee": HeaderField("Payee", False),
-            "account_number": HeaderField("Account number", False),
-            "transaction_type": HeaderField("Transaction type", False),
-            "payment_reference": HeaderField("Payment reference", False),
-            "category": HeaderField("Category", True),
-            "amount_eur": HeaderField("Amount (EUR)", False),
-            "amount_foreign_currency": HeaderField("Amount (Foreign Currency)", False),
-            "type_foreign_currency": HeaderField("Type Foreign Currency", False),
-            "exchange_rate": HeaderField("Exchange Rate", False),
-        }
+    "en": (
+        OrderedDict(
+            {
+                "date": HeaderField("Date", False),
+                "payee": HeaderField("Payee", False),
+                "account_number": HeaderField("Account number", False),
+                "transaction_type": HeaderField("Transaction type", False),
+                "payment_reference": HeaderField("Payment reference", False),
+                "category": HeaderField("Category", True),
+                "amount_eur": HeaderField("Amount (EUR)", False),
+                "amount_foreign_currency": HeaderField(
+                    "Amount (Foreign Currency)", False
+                ),
+                "type_foreign_currency": HeaderField("Type Foreign Currency", False),
+                "exchange_rate": HeaderField("Exchange Rate", False),
+            }
+        ),
+        OrderedDict(
+            {
+                "date": HeaderField("Booking Date", False),
+                "value_date": HeaderField("Value Date", False),
+                "payee": HeaderField("Partner Name", False),
+                "account_number": HeaderField("Partner Iban", False),
+                "transaction_type": HeaderField("Type", False),
+                "payment_reference": HeaderField("Payment Reference", False),
+                "category": HeaderField("Category", True),
+                "account_name": HeaderField("Account Name", False),
+                "amount_eur": HeaderField("Amount (EUR)", False),
+                "amount_foreign_currency": HeaderField("Original Amount", False),
+                "type_foreign_currency": HeaderField("Original Currency", False),
+                "exchange_rate": HeaderField("Exchange Rate", False),
+            }
+        ),
     ),
-    "de": OrderedDict(
-        {
-            "date": HeaderField("Datum", False),
-            "payee": HeaderField("Empfänger", False),
-            "account_number": HeaderField("Kontonummer", False),
-            "transaction_type": HeaderField("Transaktionstyp", False),
-            "payment_reference": HeaderField("Verwendungszweck", False),
-            "category": HeaderField("Kategorie", True),
-            "amount_eur": HeaderField("Betrag (EUR)", False),
-            "amount_foreign_currency": HeaderField("Betrag (Fremdwährung)", False),
-            "type_foreign_currency": HeaderField("Fremdwährung", False),
-            "exchange_rate": HeaderField("Wechselkurs", False),
-        }
+    "de": (
+        OrderedDict(
+            {
+                "date": HeaderField("Datum", False),
+                "payee": HeaderField("Empfänger", False),
+                "account_number": HeaderField("Kontonummer", False),
+                "transaction_type": HeaderField("Transaktionstyp", False),
+                "payment_reference": HeaderField("Verwendungszweck", False),
+                "category": HeaderField("Kategorie", True),
+                "amount_eur": HeaderField("Betrag (EUR)", False),
+                "amount_foreign_currency": HeaderField("Betrag (Fremdwährung)", False),
+                "type_foreign_currency": HeaderField("Fremdwährung", False),
+                "exchange_rate": HeaderField("Wechselkurs", False),
+            }
+        ),
     ),
-    "fr": OrderedDict(
-        {
-            "date": HeaderField("Date", False),
-            "payee": HeaderField("Bénéficiaire", False),
-            "account_number": HeaderField("Numéro de compte", False),
-            "transaction_type": HeaderField("Type de transaction", False),
-            "payment_reference": HeaderField("Référence de paiement", False),
-            "category": HeaderField("Catégorie", True),
-            "amount_eur": HeaderField("Montant (EUR)", False),
-            "amount_foreign_currency": HeaderField("Montant (Devise étrangère)", False),
-            "type_foreign_currency": HeaderField(
-                "Sélectionnez la devise étrangère", False
-            ),
-            "exchange_rate": HeaderField("Taux de conversion", False),
-        }
+    "fr": (
+        OrderedDict(
+            {
+                "date": HeaderField("Date", False),
+                "payee": HeaderField("Bénéficiaire", False),
+                "account_number": HeaderField("Numéro de compte", False),
+                "transaction_type": HeaderField("Type de transaction", False),
+                "payment_reference": HeaderField("Référence de paiement", False),
+                "category": HeaderField("Catégorie", True),
+                "amount_eur": HeaderField("Montant (EUR)", False),
+                "amount_foreign_currency": HeaderField(
+                    "Montant (Devise étrangère)", False
+                ),
+                "type_foreign_currency": HeaderField(
+                    "Sélectionnez la devise étrangère", False
+                ),
+                "exchange_rate": HeaderField("Taux de conversion", False),
+            }
+        ),
     ),
 }
 
@@ -64,21 +90,24 @@ def _is_language_supported(language: str) -> bool:
     return language in HEADER_FIELDS
 
 
-def _translation_strings_for(language: str) -> Mapping[str, str]:
-    return OrderedDict(
-        ((key, value.label) for (key, value) in HEADER_FIELDS[language].items())
-    )
+def _header_values_for(language: str, include_optional: bool = True) -> List[List[str]]:
+    result = []
+    translations = HEADER_FIELDS[language]
 
+    for translation in translations:
+        if include_optional:
+            entries = OrderedDict(
+                (key, value.label) for (key, value) in translation.items()
+            )
+        else:
+            entries = OrderedDict(
+                (key, value.label)
+                for (key, value) in translation.items()
+                if not value.optional
+            )
+        result.append(list(entries.values()))
 
-def _header_values_for(language: str, include_optional: bool = True) -> Tuple[str, ...]:
-    headers = _translation_strings_for(language)
-
-    if not include_optional:
-        for key, value in HEADER_FIELDS[language].items():
-            if value.optional:
-                del headers[key]
-
-    return headers.values()
+    return result
 
 
 class InvalidFormatError(Exception):
@@ -105,12 +134,13 @@ class N26Importer(Importer):
         self.payee_patterns = set()
         self.exchange_fees_account = exchange_fees_account
 
+        self._filepath = None
+        self._translation_strings = None
+
         if not _is_language_supported(language):
             raise InvalidFormatError(
                 "Language {} is not supported (yet)".format(language)
             )
-
-        self._translation_strings = _translation_strings_for(self.language)
 
         # Compile account and payee pattern regular expressions
 
@@ -133,11 +163,39 @@ class N26Importer(Importer):
     def account(self, _) -> data.Account:
         return data.Account(self.account_name)
 
+    def _update_translations(self, filepath: str):
+        with open(filepath, encoding=self.file_encoding) as fd:
+            line = fd.readline().strip()
+
+        actual_header = [column.strip('"') for column in line.split(",")]
+
+        translations = HEADER_FIELDS[self.language]
+
+        for translation in translations:
+            fields = translation.values()
+            header_with_optional = [field.label for field in fields]
+            header_without_optional = [
+                field.label for field in fields if not field.optional
+            ]
+
+            if (
+                actual_header == header_with_optional
+                or actual_header == header_without_optional
+            ):
+                self._translation_strings = {
+                    key: value.label for (key, value) in translation.items()
+                }
+                return
+
+        raise InvalidFormatError(
+            "File {} does not contain any of the expected headers".format(filepath)
+        )
+
     def _translate(self, key):
         return self._translation_strings[key]
 
-    def _parse_date(self, entry, key="date"):
-        return datetime.strptime(entry[self._translate(key)], "%Y-%m-%d").date()
+    def _parse_date(self, entry):
+        return datetime.strptime(entry[self._translate("date")], "%Y-%m-%d").date()
 
     def name(self):
         return "N26 {}".format(self.__class__.__name__)
@@ -145,6 +203,8 @@ class N26Importer(Importer):
     def date(self, filepath: str) -> Optional[datetime.date]:
         if not self.identify(filepath):
             return None
+
+        self._update_translations(filepath)
 
         date = None
 
@@ -161,35 +221,32 @@ class N26Importer(Importer):
 
         return date
 
-    def is_valid_header(self, line: str) -> bool:
-        expected_values = _header_values_for(self.language)
-        actual_values = [column.strip('"') for column in line.split(",")]
-
-        if len(expected_values) != len(actual_values):
-            expected_values = _header_values_for(self.language, include_optional=False)
-            if len(expected_values) != len(actual_values):
-                return False
-
-        for expected, actual in zip(expected_values, actual_values):
-            if expected != actual:
-                return False
-
-        return True
-
     def identify(self, filepath: str) -> bool:
         try:
             with open(filepath, encoding=self.file_encoding) as fd:
                 line = fd.readline().strip()
+
+            expected_headers = _header_values_for(self.language) + _header_values_for(
+                self.language, include_optional=False
+            )
+            actual_header = [column.strip('"') for column in line.split(",")]
+
+            for expected_header in expected_headers:
+                if expected_header != actual_header:
+                    continue
+                return True
+
+            return False
         except ValueError:
             return False
-        else:
-            return self.is_valid_header(line)
 
     def extract(self, filepath: str, existing: data.Entries = None) -> data.Entries:
         entries = []
 
         if not self.identify(filepath):
             return []
+
+        self._update_translations(filepath)
 
         s_amount_eur = self._translate("amount_eur")
         s_amount_foreign_currency = self._translate("amount_foreign_currency")
