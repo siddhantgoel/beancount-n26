@@ -39,10 +39,7 @@ ruff = "^0.5.7"
 beancount-n26-ec = "beancount_n26.cli:ec"
 
 [tool.taskipy.tasks]
-lint-black = "black --check beancount_n26/ tests/"
-lint-flake8 = "flake8 beancount_n26/ tests/"
-lint = "task lint-black && task lint-flake8"
-
+lint = "ruff check beancount_n26/ tests/"
 test = "pytest tests/"
 
 [build-system]
