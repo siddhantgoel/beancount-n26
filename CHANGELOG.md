@@ -2,7 +2,7 @@
 
 ## v1.2.0 (2024-10-03)
 
-- Support updated headers
+- Support updated format of CSV exports (noticed towards September 2023)
 
 ## v1.1.0 (2024-07-09)
 
