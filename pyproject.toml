@@ -25,15 +25,15 @@ repository = "https://github.com/siddhantgoel/beancount-n26"
 keywords = ["banking", "beancount", "cli-accounting", "finance"]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.8"
 beancount = "^3.0.0"
 beangulp = "^0.1.1"
 
 [tool.poetry.group.dev.dependencies]
 taskipy = "^1.13.0"
 black = "^24.4.2"
-flake8 = "^7.1.0"
 pytest = "^8.2.2"
+ruff = "^0.5.7"
 
 [tool.poetry.scripts]
 beancount-n26-ec = "beancount_n26.cli:ec"
