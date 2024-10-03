@@ -1,7 +1,6 @@
 import datetime
 import os.path
 from textwrap import dedent
-import random
 
 from beancount.core.number import Decimal
 from beancount.core.data import Transaction
@@ -15,12 +14,12 @@ IBAN_NUMBER = "DE99 9999 9999 9999 9999 99".replace(" ", "")
 
 
 def _format(string, **kwargs):
-    header = _header_values_for(**kwargs)
+    headers = _header_values_for(**kwargs)
 
     kwargs.update(
         {
             "iban_number": IBAN_NUMBER,
-            "header": ",".join(random.choice(header)),
+            "header": ",".join(headers[0]),
         }
     )
 
@@ -43,7 +42,7 @@ def importer(language):
         IBAN_NUMBER,
         "Assets:N26",
         language=language,
-        exchange_fees_account="Expenses:TransferWise",
+        exchange_fees_account="Expenses:Exchange",
     )
 
 
@@ -333,7 +332,7 @@ def test_extract_conversion(importer, filename):
         postings=[
             ("Assets:N26", "EUR", Decimal("0.574997419221637245793331269")),
             (
-                "Expenses:TransferWise",
+                "Expenses:Exchange",
                 "EUR",
                 Decimal("-0.574997419221637245793331269"),
             ),
