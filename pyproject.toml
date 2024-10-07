@@ -33,7 +33,7 @@ beangulp = "^0.1.1"
 taskipy = "^1.13.0"
 black = "^24.4.2"
 pytest = "^8.2.2"
-ruff = "^0.5.7"
+ruff = ">=0.5.7,<0.7.0"
 
 [tool.poetry.scripts]
 beancount-n26-ec = "beancount_n26.cli:ec"
