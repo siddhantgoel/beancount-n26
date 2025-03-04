@@ -31,7 +31,7 @@ initialization parameters have been shifted to `pyproject.toml`.
 Add the following to your `pyproject.toml` in your project root.
 
 ```toml
-[tool.beancount-n26]
+[tool.beancount-n26.ec]
 ibn = "IBAN_NUMBER" # required
 account_name = "Assets:N26" # required
 language = "en"

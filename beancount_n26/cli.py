@@ -40,7 +40,7 @@ def _extract_config(section: str):
     config_section = config.get("tool", {}).get("beancount-n26", {}).get(section)
 
     if not config_section:
-        print("tool.beancount-n26 not found in pyproject.toml.")
+        print(f"tool.beancount-n26.{section} not found in pyproject.toml.")
         sys.exit(1)
 
     return config_section
