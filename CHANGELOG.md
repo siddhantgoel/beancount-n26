@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.2.1 (2025-03-05)
+
+- Update CLI error message for missing configuration
+
 ## v1.2.0 (2024-10-03)
 
 - Support updated format of CSV exports (noticed towards September 2023)
