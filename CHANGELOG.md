@@ -3,6 +3,8 @@
 ## v1.2.1 (2025-03-05)
 
 - Update CLI error message for missing configuration
+- Add Python 3.12 support
+- Drop Python 3.8 support
 
 ## v1.2.0 (2024-10-03)
 
