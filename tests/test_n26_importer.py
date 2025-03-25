@@ -28,7 +28,6 @@ def importer():
         IBAN_NUMBER,
         "Assets:N26",
         language="en",
-        exchange_fees_account="Expenses:Exchange",
     )
 
 
