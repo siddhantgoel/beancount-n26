@@ -194,9 +194,6 @@ class N26Importer(Importer):
     def _parse_date(self, entry):
         return datetime.strptime(entry[self._translate("date")], "%Y-%m-%d").date()
 
-    def name(self):
-        return "N26 {}".format(self.__class__.__name__)
-
     def date(self, filepath: str) -> Optional[datetime.date]:
         if not self.identify(filepath):
             return None
@@ -253,12 +250,14 @@ class N26Importer(Importer):
         s_exchange_rate = self._translate("exchange_rate")
 
         with open(filepath, encoding=self.file_encoding) as fd:
+            lines = [line.strip() for line in fd.readlines()]
             reader = csv.DictReader(
-                fd, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
+                lines, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
 
             for index, line in enumerate(reader):
                 meta = data.new_metadata(filepath, index)
+                meta["__source__"] = lines[index]
 
                 postings = []
 
