@@ -16,13 +16,16 @@ def ec():
     account_patterns = config.get("account_patterns", {})
     exchange_fees_account = config.get("exchange_fees_account")
 
+    if exchange_fees_account:
+        print("exchange_fees_account is obsolete, please remove from the config")
+        sys.exit(1)
+
     importer = N26Importer(
         iban,
         account_name,
         language=language,
         file_encoding=file_encoding,
         account_patterns=account_patterns,
-        exchange_fees_account=exchange_fees_account,
     )
     bg_main(importer)
 

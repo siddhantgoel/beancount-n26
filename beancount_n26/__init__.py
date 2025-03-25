@@ -7,7 +7,6 @@ from typing import Dict, List, Optional
 from beancount.core import data, flags
 from beancount.core.amount import Amount
 from beancount.core.number import Decimal
-from beancount.core.position import CostSpec
 from beangulp.importer import Importer
 
 HeaderField = namedtuple("HeaderField", ["label", "optional"])
@@ -125,14 +124,12 @@ class N26Importer(Importer):
         language: str = "en",
         file_encoding: str = "utf-8",
         account_patterns: Dict[str, List[str]] = {},
-        exchange_fees_account: Optional[str] = None,
     ):
         self.iban = iban
         self.account_name = account_name
         self.language = language
         self.file_encoding = file_encoding
         self.payee_patterns = set()
-        self.exchange_fees_account = exchange_fees_account
 
         self._filepath = None
         self._translation_strings = None
@@ -265,44 +262,17 @@ class N26Importer(Importer):
 
                 postings = []
 
-                if line[s_amount_foreign_currency]:
+                if line[s_amount_foreign_currency] and line[s_type_foreign_currency] != 'EUR':
                     exchange_rate = Decimal(line[s_exchange_rate])
-                    amount_eur = Decimal(line[s_amount_eur])
                     amount_foreign = Decimal(line[s_amount_foreign_currency])
                     currency = line[s_type_foreign_currency]
-
-                    fees = amount_eur + abs(amount_foreign / exchange_rate)
-
-                    if fees != 0:
-                        assert (
-                            self.exchange_fees_account
-                        ), "exchange_fees_account required for conversion fees"
-
-                        postings += [
-                            data.Posting(
-                                self.account(filepath),
-                                Amount(-fees, "EUR"),
-                                None,
-                                None,
-                                None,
-                                None,
-                            ),
-                            data.Posting(
-                                self.exchange_fees_account,
-                                Amount(fees, "EUR"),
-                                None,
-                                None,
-                                None,
-                                None,
-                            ),
-                        ]
 
                     postings += [
                         data.Posting(
                             self.account(filepath),
-                            Amount(amount_eur - fees, "EUR"),
-                            CostSpec(exchange_rate, None, currency, None, None, None),
+                            Amount(-amount_foreign, currency),
                             None,
+                            Amount(Decimal(1.0) / exchange_rate, "EUR"),
                             None,
                             None,
                         ),
