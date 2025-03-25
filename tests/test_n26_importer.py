@@ -193,9 +193,7 @@ def test_extract_conversion(importer, filename):
         Assets:N26  -42.0 EUR
 
       2022-08-03 * "Charlie" "Foreign food"
-        Assets:N26          0.574997419221637245793331269 EUR
-        Expenses:Exchange  -0.574997419221637245793331269 EUR
-        Assets:N26         -9.425002580778362754206668731 EUR {0.9687 CHF}
+        Assets:N26  -9.13 CHF @ 1.032311345101682667492515743 EUR
 
       2022-08-04 * "Mustermann GmbH" "MasterCard Payment"
         Assets:N26  -12.21 EUR
