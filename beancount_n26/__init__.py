@@ -265,7 +265,7 @@ class N26Importer(Importer):
 
                 postings = []
 
-                if line[s_amount_foreign_currency]:
+                if line[s_amount_foreign_currency] and line[s_type_foreign_currency] != 'EUR':
                     exchange_rate = Decimal(line[s_exchange_rate])
                     amount_eur = Decimal(line[s_amount_eur])
                     amount_foreign = Decimal(line[s_amount_foreign_currency])
