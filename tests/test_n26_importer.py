@@ -198,7 +198,7 @@ def test_extract_conversion(importer, filename):
         Assets:N26         -9.425002580778362754206668731 EUR {0.9687 CHF}
 
       2022-08-04 * "Mustermann GmbH" "MasterCard Payment"
-        Assets:N26  -12.21 EUR {1.0 EUR}
+        Assets:N26  -12.21 EUR
    """, transactions, allow_incomplete=True)
 
 def test_extract_updated_header(importer, filename):
