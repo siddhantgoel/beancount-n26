@@ -124,14 +124,12 @@ class N26Importer(Importer):
         language: str = "en",
         file_encoding: str = "utf-8",
         account_patterns: Dict[str, List[str]] = {},
-        exchange_fees_account: Optional[str] = None,
     ):
         self.iban = iban
         self.account_name = account_name
         self.language = language
         self.file_encoding = file_encoding
         self.payee_patterns = set()
-        self.exchange_fees_account = exchange_fees_account
 
         self._filepath = None
         self._translation_strings = None
