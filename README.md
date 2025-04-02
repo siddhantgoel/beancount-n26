@@ -32,7 +32,7 @@ Add the following to your `pyproject.toml` in your project root.
 
 ```toml
 [tool.beancount-n26.ec]
-ibn = "IBAN_NUMBER" # required
+iban = "IBAN_NUMBER" # required
 account_name = "Assets:N26" # required
 language = "en"
 file_encoding = "utf-8"
@@ -93,7 +93,7 @@ specify the `exchange_fees_account` parameter.
 
 ```toml
 [tool.beancount-n26]
-ibn = "IBAN_NUMBER" # required
+iban = "IBAN_NUMBER" # required
 account_name = "Assets:N26" # required
 language = "en"
 file_encoding = "utf-8"
