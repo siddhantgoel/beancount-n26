@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.3.0 (2025-04-03)
+
+- Remove `beancount-n26-cli` in favor of `beangulp.Ingest` based workflow
+  - Beangulp examples suggest using a Python script that instantiates `Beangulp.Ingest`
+    with a list of importers, which makes the CLI script redundant.
+
 ## v1.2.1 (2025-03-05)
 
 - Update CLI error message for missing configuration
