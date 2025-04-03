@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beancount-n26"
-version = "1.3.0"
+version = "1.4.0"
 description = "Beancount Importer for N26 CSV exports"
 readme = "README.md"
 authors = ["Siddhant Goel <me@sgoel.dev>"]
