@@ -17,26 +17,36 @@ $ pip install beancount-n26
 In case you prefer installing from the Github repository, please note that `main` is the
 development branch so `stable` is what you should be installing from.
 
-Note that v1.x will *only* work with Beancount 3.x, while v0.x will *only* work with
-Beancount 2.x, due to incompatibilities between Beancount 3.x and 2.x.
-
 ## Usage
 
 ### Beancount 3.x
 
 Beancount 3.x has replaced the `config.py` file based workflow in favor of having a
-script based workflow, as per the [changes documented here]. As a result, the importer's
-initialization parameters have been shifted to `pyproject.toml`.
+script based workflow, as per the [changes documented here]. The `beangulp` examples
+suggest using a Python script based on `beangulp.Ingest`. Here's an example of how that
+might work:
 
-Add the following to your `pyproject.toml` in your project root.
+Add an `import.py` script in your project root with the following contents:
 
-```toml
-[tool.beancount-n26.ec]
-iban = "IBAN_NUMBER" # required
-account_name = "Assets:N26" # required
-language = "en"
-file_encoding = "utf-8"
+```python
+from beancount_n26 import N26Importer
+from beangulp import Ingest
+
+importers = (
+    N26Importer(
+        IBAN_NUMBER,
+        'Assets:N26',
+        language='en',
+        file_encoding='utf-8',
+    ),
+)
+
+if __name__ == "__main__":
+    ingest = Ingest(importer)
+    ingest()
 ```
+
+... and run it directly using `python import.py extract`.
 
 ### Beancount 2.x
 
