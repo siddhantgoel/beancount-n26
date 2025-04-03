@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v1.4.0 (2025-04-03)
+- Fix incorrect cross-currency postings (thanks [@sarg])
+
 ## v1.3.0 (2025-04-03)
 
 - Remove `beancount-n26-ec` CLI in favor of a `beangulp.Ingest` based workflow
@@ -80,4 +83,5 @@
 [@Eazhi]: https://github.com/Eazhi
 [@Fumesover]: https://github.com/Fumesover
 [@ppetru]: https://github.com/ppetru
+[@sarg]: https://github.com/sarg
 [@tbm]: https://github.com/tbm
