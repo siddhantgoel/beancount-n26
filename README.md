@@ -106,51 +106,6 @@ CONFIG = [
 ]
 ```
 
-### Multiple-currency transactions
-
-To mark transaction fees associated with multiple-currency transactions, you can
-specify the `exchange_fees_account` parameter.
-
-#### Beancount 3.x
-
-```python
-from beancount_n26 import N26Importer
-from beangulp import Ingest
-
-importers = (
-    N26Importer(
-        IBAN_NUMBER,
-        'Assets:N26',
-        exchange_fees_account="Expenses:TransferWise"
-    ),
-)
-
-if __name__ == "__main__":
-    ingest = Ingest(importer)
-    ingest()
-```
-
-#### Beancount 2.x
-
-```python
-from beancount_n26 import N26Importer
-
-CONFIG = [
-    N26Importer(
-        IBAN_NUMBER,
-        'Assets:N26',
-        language='en',
-        file_encoding='utf-8',
-        exchange_fees_account='Expenses:TransferWise',
-    ),
-]
-```
-
-With this in place, for transactions where both the amount in EUR and amount in foreign
-currency are given, the importer will calculate the transaction fee based on the
-exchange rate included in the CSV export and automatically allocate the value to the
-account specified in `exchange_fees_account`.
-
 ## Contributing
 
 Please make sure you have Python 3.9+ and [Poetry] installed.
