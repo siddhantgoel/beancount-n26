@@ -76,9 +76,21 @@ A few helper functions have been provided in
 
 #### Beancount 3.x
 
-```toml
-[tool.beancount-n26.account_patterns]
-"Expenses:Supermarket" = ["REWE", "ALDI"]
+```python
+from beancount_n26 import N26Importer
+from beangulp import Ingest
+
+importers = (
+    N26Importer(
+        IBAN_NUMBER,
+        'Assets:N26',
+        account_patterns={"Expenses:Supermarket": ["REWE", "ALDI"]}
+    ),
+)
+
+if __name__ == "__main__":
+    ingest = Ingest(importer)
+    ingest()
 ```
 
 #### Beancount 2.x
@@ -101,13 +113,21 @@ specify the `exchange_fees_account` parameter.
 
 #### Beancount 3.x
 
-```toml
-[tool.beancount-n26]
-iban = "IBAN_NUMBER" # required
-account_name = "Assets:N26" # required
-language = "en"
-file_encoding = "utf-8"
-exchange_fees_account = "Expenses:TransferWise"
+```python
+from beancount_n26 import N26Importer
+from beangulp import Ingest
+
+importers = (
+    N26Importer(
+        IBAN_NUMBER,
+        'Assets:N26',
+        exchange_fees_account="Expenses:TransferWise"
+    ),
+)
+
+if __name__ == "__main__":
+    ingest = Ingest(importer)
+    ingest()
 ```
 
 #### Beancount 2.x
