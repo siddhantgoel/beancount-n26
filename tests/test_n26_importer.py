@@ -1,11 +1,11 @@
 import datetime
 from textwrap import dedent
 
-from beancount.parser.cmptest import TestCase as BeancountTest
-from beancount.parser.booking import convert_lot_specs_to_lots
 import pytest
+from beancount.parser.booking import convert_lot_specs_to_lots
+from beancount.parser.cmptest import TestCase as BeancountTest
 
-from beancount_n26 import N26Importer, HEADER_FIELDS
+from beancount_n26 import HEADER_FIELDS, N26Importer
 
 IBAN_NUMBER = "DE99 9999 9999 9999 9999 99".replace(" ", "")
 
@@ -13,14 +13,18 @@ IBAN_NUMBER = "DE99 9999 9999 9999 9999 99".replace(" ", "")
 def assert_equal_entries(expected_entries, actual_entries, allow_incomplete=False):
     # convert CostSpec to Cost to allow comparison
     actual_with_costs = convert_lot_specs_to_lots(actual_entries)[0]
-    BeancountTest.assertEqualEntries(pytest, expected_entries, actual_with_costs, allow_incomplete)
+    BeancountTest.assertEqualEntries(
+        pytest, expected_entries, actual_with_costs, allow_incomplete
+    )
+
 
 @pytest.fixture
 def filename(request, tmp_path):
-    with open(tmp_path / 'input.csv', 'w') as file:
+    with open(tmp_path / "input.csv", "w") as file:
         file.write(dedent(request.function.__doc__))
         file.flush()
         return file.name
+
 
 @pytest.fixture
 def importer():
@@ -88,10 +92,14 @@ def test_extract_single_transaction(importer, filename):
     date = importer.date(filename)
 
     assert date == datetime.date(2019, 10, 10)
-    assert_equal_entries(r"""
+    assert_equal_entries(
+        r"""
       2019-10-10 * "Muster GmbH" "Muster payment"
         Assets:N26  -12.34 EUR
-    """, transactions)
+    """,
+        transactions,
+    )
+
 
 def test_extract_multiple_transactions(importer, filename):
     """\
@@ -105,7 +113,8 @@ def test_extract_multiple_transactions(importer, filename):
     date = importer.date(filename)
 
     assert date == datetime.date(2020, 1, 5)
-    assert_equal_entries(r"""
+    assert_equal_entries(
+        r"""
       2019-12-28 * "MAX MUSTERMANN" "Muster GmbH"
           Assets:N26     -56.78 EUR
 
@@ -114,7 +123,10 @@ def test_extract_multiple_transactions(importer, filename):
 
       2020-01-05 * "Muster SARL" "Muster Fr payment"
           Assets:N26  -42.24 EUR
-    """, transactions)
+    """,
+        transactions,
+    )
+
 
 def test_extract_multiple_transactions_with_classification(filename):
     """\
@@ -139,7 +151,8 @@ def test_extract_multiple_transactions_with_classification(filename):
     date = importer.date(filename)
 
     assert date == datetime.date(2020, 1, 5)
-    assert_equal_entries(r"""
+    assert_equal_entries(
+        r"""
       2019-12-28 * "MAX MUSTERMANN" "Muster GmbH"
           Assets:N26     -56.78 EUR
           Expenses:Misc
@@ -149,7 +162,10 @@ def test_extract_multiple_transactions_with_classification(filename):
 
       2020-01-05 * "Muster SARL" "Muster Fr payment"
           Assets:N26  -42.24 EUR
-    """, transactions, allow_incomplete=True)
+    """,
+        transactions,
+        allow_incomplete=True,
+    )
 
 
 @pytest.mark.parametrize("language", HEADER_FIELDS.keys())
@@ -175,7 +191,7 @@ def test_extract_conversion(importer, filename):
     "Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
     "2022-08-01","Alice","DE99999999999999999999","Income","Muster GmbH","Income","56.78","","",""
     "2022-08-02","Bob","DE99999999999999999999","Outgoing Transfer","Home food","Foo","-42.0","","",""
-    "2022-08-03","Charlie","DE99999999999999999999","Outgoing Transfer in a foreign currency","Foreign food","Bar","-10.0","9.13","CHF","0.9687"
+    "2022-08-03","Charlie","DE99999999999999999999","Outgoing Transfer in a foreign currency","Foreign food","Bar","-10.0","9.13","CHF","1.25"
     "2022-08-04","Mustermann GmbH","DE99999999999999999999","-","MasterCard Payment","-","-12.21","-12.21","EUR","1.0"
     """
 
@@ -184,19 +200,26 @@ def test_extract_conversion(importer, filename):
     date = importer.date(filename)
     assert date == datetime.date(2022, 8, 4)
 
-    assert_equal_entries(r"""
-      2022-08-01 * "Alice" "Muster GmbH"
-        Assets:N26  56.78 EUR
+    assert_equal_entries(
+        dedent(
+            """
+            2022-08-01 * "Alice" "Muster GmbH"
+              Assets:N26  56.78 EUR
 
-      2022-08-02 * "Bob" "Home food"
-        Assets:N26  -42.0 EUR
+            2022-08-02 * "Bob" "Home food"
+              Assets:N26  -42.0 EUR
 
-      2022-08-03 * "Charlie" "Foreign food"
-        Assets:N26  -9.13 CHF @ 1.032311345101682667492515743 EUR
+            2022-08-03 * "Charlie" "Foreign food"
+              Assets:N26  -10.0 EUR @ 0.8 CHF
 
-      2022-08-04 * "Mustermann GmbH" "MasterCard Payment"
-        Assets:N26  -12.21 EUR
-   """, transactions, allow_incomplete=True)
+            2022-08-04 * "Mustermann GmbH" "MasterCard Payment"
+              Assets:N26  -12.21 EUR
+            """
+        ),
+        transactions,
+        allow_incomplete=True,
+    )
+
 
 def test_extract_updated_header(importer, filename):
     """\
@@ -209,7 +232,10 @@ def test_extract_updated_header(importer, filename):
 
     assert date == datetime.date(2019, 10, 10)
 
-    assert_equal_entries(r"""
+    assert_equal_entries(
+        r"""
       2019-10-10 * "Muster GmbH" "Muster payment"
         Assets:N26  -12.34 EUR
-    """, transactions)
+    """,
+        transactions,
+    )

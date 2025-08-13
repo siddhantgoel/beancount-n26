@@ -1,6 +1,6 @@
-from collections import OrderedDict, namedtuple
 import csv
 import re
+from collections import OrderedDict, namedtuple
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -261,28 +261,41 @@ class N26Importer(Importer):
 
                 postings = []
 
-                if line[s_amount_foreign_currency] and line[s_type_foreign_currency] != 'EUR':
+                eur_amount = line[s_amount_eur]
+                foreign_amount = line[s_amount_foreign_currency]
+                foreign_currency = line[s_type_foreign_currency]
+
+                if foreign_amount and foreign_currency != "EUR":
+                    # According to the documentation:
+                    # https://beancount.github.io/docs/command_line_accounting_cookbook.html#currency-transfers-conversions
+                    # For the following posting
+                    #     Assets:US:BofA:Checking      10000.00 USD @ 0.90 CHF
+                    # > The balance amount of the second posting is calculated as
+                    # > 10,000.00 USD x 0.90 CHF/USD = 9,000 CHF ...
+                    #
+                    # The exchange rate from the N26 CSV output seems to be the EUR
+                    # amount divided by the amount in the foreign currency. So to keep
+                    # things as transparent as possible (i.e. avoid decimal divisions)
+                    # we output the main amount in the foreign currency and attach the
+                    # EUR exchange rate as the price of the transaction.
+
                     exchange_rate = Decimal(line[s_exchange_rate])
-                    amount_foreign = Decimal(line[s_amount_foreign_currency])
-                    currency = line[s_type_foreign_currency]
 
                     postings += [
                         data.Posting(
                             self.account(filepath),
-                            Amount(-amount_foreign, currency),
+                            Amount(Decimal(eur_amount), "EUR"),
                             None,
-                            Amount(Decimal(1.0) / exchange_rate, "EUR"),
+                            Amount(1 / exchange_rate, foreign_currency),
                             None,
                             None,
                         ),
                     ]
                 else:
-                    amount = Decimal(line[s_amount_eur])
-
                     postings += [
                         data.Posting(
                             self.account(filepath),
-                            Amount(amount, "EUR"),
+                            Amount(Decimal(eur_amount), "EUR"),
                             None,
                             None,
                             None,
