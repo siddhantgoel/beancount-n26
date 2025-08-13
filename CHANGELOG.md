@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v1.5.0 (2025-08-14)
+- Fix foreign currency conversion
+
 ## v1.4.0 (2025-04-03)
 - Fix incorrect cross-currency postings (thanks [@sarg])
 
