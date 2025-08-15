@@ -274,10 +274,9 @@ class N26Importer(Importer):
                     # > 10,000.00 USD x 0.90 CHF/USD = 9,000 CHF ...
                     #
                     # The exchange rate from the N26 CSV output seems to be the EUR
-                    # amount divided by the amount in the foreign currency. So to keep
-                    # things as transparent as possible (i.e. avoid decimal divisions)
-                    # we output the main amount in the foreign currency and attach the
-                    # EUR exchange rate as the price of the transaction.
+                    # amount divided by the amount in the foreign currency. We output
+                    # the main amount in EUR (as that's the main currency of the
+                    # account), and attach the inverse exchange rate as the price.
 
                     exchange_rate = Decimal(line[s_exchange_rate])
 
