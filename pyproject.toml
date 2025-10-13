@@ -33,7 +33,7 @@ beangulp = ">=0.1.1,<0.3.0"
 taskipy = "^1.13.0"
 black = ">=24.4.2,<26.0.0"
 pytest = "^8.2.2"
-ruff = ">=0.5.7,<0.14.0"
+ruff = ">=0.5.7,<0.15.0"
 
 [tool.taskipy.tasks]
 lint = "ruff check beancount_n26/ tests/"
