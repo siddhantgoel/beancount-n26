@@ -30,14 +30,9 @@ beancount = ">=2.3.5"
 beangulp = ">=0.1.1,<0.3.0"
 
 [tool.poetry.group.dev.dependencies]
-taskipy = "^1.13.0"
 black = ">=24.4.2,<26.0.0"
 pytest = "^8.2.2"
 ruff = ">=0.5.7,<0.16.0"
-
-[tool.taskipy.tasks]
-lint = "ruff check beancount_n26/ tests/"
-test = "pytest tests/"
 
 [build-system]
 requires = ["poetry-core"]
