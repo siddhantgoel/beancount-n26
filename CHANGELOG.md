@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.6.0 (2026-05-27)
+- Add Python 3.13 and 3.14 support
+- Drop Python 3.9 support
+
 ## v1.5.0 (2025-08-14)
 - Fix foreign currency conversion
 
