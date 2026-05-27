@@ -1,4 +1,5 @@
 [tools]
+poetry = "latest"
 python = "3.14"
 
 [tasks.lint]
