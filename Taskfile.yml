@@ -1,0 +1,12 @@
+version: 3
+
+tasks:
+  lint:
+    desc: Lint code
+    cmds:
+      - poetry run ruff check beancount_n26/ tests/
+
+  test:
+    desc: Run tests
+    cmds:
+      - poetry run pytest tests/
