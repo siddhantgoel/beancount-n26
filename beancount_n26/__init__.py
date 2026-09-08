@@ -2,7 +2,7 @@ import csv
 import re
 from collections import OrderedDict, namedtuple
 from datetime import datetime
-from typing import Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 from beancount.core import data, flags
 from beancount.core.amount import Amount
@@ -89,7 +89,7 @@ def _is_language_supported(language: str) -> bool:
     return language in HEADER_FIELDS
 
 
-def _header_values_for(language: str, include_optional: bool = True) -> List[List[str]]:
+def _header_values_for(language: str, include_optional: bool = True) -> list[list[str]]:
     result = []
     translations = HEADER_FIELDS[language]
 
@@ -123,7 +123,7 @@ class N26Importer(Importer):
         account_name: str,
         language: str = "en",
         file_encoding: str = "utf-8",
-        account_patterns: Dict[str, List[str]] = {},
+        account_patterns: dict[str, list[str]] | None = None,
     ):
         self.iban = iban
         self.account_name = account_name
@@ -135,19 +135,18 @@ class N26Importer(Importer):
         self._translation_strings = None
 
         if not _is_language_supported(language):
-            raise InvalidFormatError(
-                "Language {} is not supported (yet)".format(language)
-            )
+            raise InvalidFormatError(f"Language {language} is not supported (yet)")
 
         # Compile account and payee pattern regular expressions
 
         seen_patterns = set()
 
+        account_patterns = account_patterns if account_patterns is not None else {}
         for account, patterns in account_patterns.items():
             for pattern in patterns:
-                assert (
-                    pattern not in seen_patterns
-                ), f"{pattern} defined in multiple accounts"
+                assert pattern not in seen_patterns, (
+                    f"{pattern} defined in multiple accounts"
+                )
 
                 seen_patterns.add(pattern)
                 self.payee_patterns.add(
@@ -185,16 +184,20 @@ class N26Importer(Importer):
                 return
 
         raise InvalidFormatError(
-            "File {} does not contain any of the expected headers".format(filepath)
+            f"File {filepath} does not contain any of the expected headers"
         )
 
     def _translate(self, key):
         return self._translation_strings[key]
 
     def _parse_date(self, entry):
-        return datetime.strptime(entry[self._translate("date")], "%Y-%m-%d").date()
+        return (
+            datetime.strptime(entry[self._translate("date")], "%Y-%m-%d")
+            .astimezone(ZoneInfo("Europe/Berlin"))
+            .date()
+        )
 
-    def date(self, filepath: str) -> Optional[datetime.date]:
+    def date(self, filepath: str):
         if not self.identify(filepath):
             return None
 
@@ -250,7 +253,7 @@ class N26Importer(Importer):
         s_exchange_rate = self._translate("exchange_rate")
 
         with open(filepath, encoding=self.file_encoding) as fd:
-            lines = [line.strip() for line in fd.readlines()]
+            lines = [line.strip() for line in fd]
             reader = csv.DictReader(
                 lines, delimiter=",", quoting=csv.QUOTE_MINIMAL, quotechar='"'
             )
