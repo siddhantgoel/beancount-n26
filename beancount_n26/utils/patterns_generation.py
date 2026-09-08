@@ -1,9 +1,8 @@
 import json
-
-from beancount.core import data
-from beancount import loader
-
 from collections import defaultdict
+
+from beancount import loader
+from beancount.core import data
 
 
 def generate_payees_to_account(main_file: str, dump_file: str):
@@ -16,7 +15,7 @@ def generate_payees_to_account(main_file: str, dump_file: str):
     Generates a Dict[str, List[str]] containing for each "payee" in the
     transaction it's associated list of accounts
     """
-    entries, errors, options = loader.load_file(main_file)
+    entries, _, _ = loader.load_file(main_file)
     transactions = list(filter(lambda x: isinstance(x, data.Transaction), entries))
     payees_to_account = defaultdict(set)
     for item in transactions:
@@ -24,8 +23,8 @@ def generate_payees_to_account(main_file: str, dump_file: str):
             item.postings[1].account
         )
 
-    for k, v in payees_to_account.items():
-        payees_to_account[k] = sorted(list(v))
+    for key, value in payees_to_account.items():
+        payees_to_account[key] = sorted(value)
 
     with open(dump_file, "w") as f:
         json.dump(payees_to_account, f, indent=2)
@@ -41,7 +40,7 @@ def generate_account_to_payees(main_file: str, dump_file: str):
     Generates a Dict[str, List[str]] containing for each account in the
     transaction it's associated list of payees
     """
-    entries, errors, options = loader.load_file(main_file)
+    entries, _, _ = loader.load_file(main_file)
     transactions = list(filter(lambda x: isinstance(x, data.Transaction), entries))
     account_to_payees = defaultdict(set)
     for item in transactions:
@@ -49,8 +48,8 @@ def generate_account_to_payees(main_file: str, dump_file: str):
             item.payee.lower() if item.payee else None
         )
 
-    for k, v in account_to_payees.items():
-        account_to_payees[k] = sorted(list(filter(None, v)))
+    for key, value in account_to_payees.items():
+        account_to_payees[key] = sorted(filter(None, value))
 
     with open(dump_file, "w") as f:
         json.dump(account_to_payees, f, indent=2)
